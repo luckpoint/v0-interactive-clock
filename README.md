@@ -1,30 +1,80 @@
-# Interactive clock design
+# 🕐 Interactive Clock
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+A beautiful, interactive analog clock built with React, TypeScript, and Vite. You can drag the clock hands to set any time, and it supports both 12-hour and 24-hour formats with multilingual support (English/Japanese).
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/shunsukelps-projects/v0-interactive-clock-design)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/dvi1VV2VVof)
+## 🌟 Features
 
-## Overview
+- **Interactive Analog Clock**: Drag the red hour hand and blue minute hand to set time
+- **Digital Display**: Shows time in both analog and digital formats
+- **12/24 Hour Formats**: Toggle between 12-hour (AM/PM) and 24-hour formats
+- **Multilingual Support**: Automatically detects browser language (English/Japanese)
+- **Beautiful UI**: Modern design with glassmorphic effects and smooth animations
+- **Touch Support**: Works on both desktop and mobile devices
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## 🚀 Live Demo
 
-## Deployment
+Visit the live demo at: [https://luckpoint.github.io/interactive-clock/](https://luckpoint.github.io/interactive-clock/)
 
-Your project is live at:
+## 🛠️ Development
 
-**[https://vercel.com/shunsukelps-projects/v0-interactive-clock-design](https://vercel.com/shunsukelps-projects/v0-interactive-clock-design)**
+### Prerequisites
 
-## Build your app
+- Node.js (v18 or higher)
+- npm or yarn
 
-Continue building your app on:
+### Installation
 
-**[https://v0.dev/chat/projects/dvi1VV2VVof](https://v0.dev/chat/projects/dvi1VV2VVof)**
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/interactive-clock.git
+cd interactive-clock
 
-## How It Works
+# Install dependencies
+npm install
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+# Start development server
+npm run dev
+```
+
+### Building for Production
+
+```bash
+# Build the project
+npm run build
+
+# Preview the production build
+npm run preview
+```
+
+## 🌐 Deploy to GitHub Pages
+
+This project is configured for easy deployment to GitHub Pages using GitHub Actions.
+
+### Automatic Deployment
+
+1. Push your code to the `main` branch
+2. GitHub Actions will automatically build and deploy your app
+3. Your app will be available at `https://yourusername.github.io/interactive-clock/`
+
+### GitHub Repository Settings
+
+Make sure to enable GitHub Pages in your repository settings:
+
+1. Go to **Settings** → **Pages**
+2. Set **Source** to "GitHub Actions"
+3. Your site will be available at `https://yourusername.github.io/interactive-clock/`
+
+## 🎯 Usage
+
+1. **Set Time**: Drag the red (hour) or blue (minute) hands to set your desired time
+2. **Toggle Format**: Click the time format button to switch between 12-hour and 24-hour formats
+3. **Reset**: Click the reset button to set the time back to the current time
+4. **Cross Midnight**: The clock automatically handles AM/PM transitions when you drag the hands past 12
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License.
