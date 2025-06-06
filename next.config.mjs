@@ -12,6 +12,7 @@ const nextConfig = {
   output: 'export',
   trailingSlash: true,
   basePath: process.env.NODE_ENV === 'production' ? '/v0-interactive-clock' : '',
+  distDir: 'out',
 }
 
 export default nextConfig
