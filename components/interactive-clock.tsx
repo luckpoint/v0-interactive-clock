@@ -14,6 +14,12 @@ interface Translations {
   twelveHourFormat: string
   twentyFourHourFormat: string
   twentyFourHourLabel: string
+  toggleSecondHand: string
+  showSecondHand: string
+  hideSecondHand: string
+  toggleClockMovement: string
+  startClock: string
+  stopClock: string
 }
 
 // テーマの型定義
@@ -92,6 +98,12 @@ const translations: Record<string, Translations> = {
     twelveHourFormat: "12-Hour Format",
     twentyFourHourFormat: "24-Hour Format",
     twentyFourHourLabel: "24-Hour Format",
+    toggleSecondHand: "⏱️",
+    showSecondHand: "Show Second Hand",
+    hideSecondHand: "Hide Second Hand",
+    toggleClockMovement: "⚙️",
+    startClock: "Start Clock",
+    stopClock: "Stop Clock",
   },
   ja: {
     title: "インタラクティブ時計",
@@ -102,20 +114,30 @@ const translations: Record<string, Translations> = {
     twelveHourFormat: "12時間表記",
     twentyFourHourFormat: "24時間表記",
     twentyFourHourLabel: "24時間表記",
+    toggleSecondHand: "⏱️",
+    showSecondHand: "秒針を表示",
+    hideSecondHand: "秒針を非表示",
+    toggleClockMovement: "⚙️",
+    startClock: "時計を動かす",
+    stopClock: "時計を止める",
   },
 }
 
 interface Time {
   hours: number // 0-23の24時間形式
   minutes: number // 0-59
+  seconds: number // 0-59
 }
 
 export default function InteractiveClock() {
-  const [time, setTime] = useState<Time>({ hours: 0, minutes: 0 })
+  const [time, setTime] = useState<Time>({ hours: 0, minutes: 0, seconds: 0 })
   const [isDragging, setIsDragging] = useState<"hour" | "minute" | null>(null)
   const [is24HourMode, setIs24HourMode] = useState<boolean>(false) // 24時間表記モード
   const [language, setLanguage] = useState<string>("en") // デフォルトは英語
   const [currentTheme, setCurrentTheme] = useState<string>("warm")
+  const [showSecondHand, setShowSecondHand] = useState<boolean>(true) // 秒針表示の状態
+  const [isClockRunning, setIsClockRunning] = useState<boolean>(true) // 時計の動作状態
+
   const clockRef = useRef<SVGSVGElement>(null)
   const prevMinuteRef = useRef<number>(10) // 前回の分の値を追跡
   const prevHourAngleRef = useRef<number>(0) // 前回の時間針の角度を追跡
@@ -127,7 +149,11 @@ export default function InteractiveClock() {
   // クライアントサイドでのみ実行
   useEffect(() => {
     const now = new Date()
-    setTime({ hours: now.getHours(), minutes: now.getMinutes() })
+    setTime({
+      hours: now.getHours(),
+      minutes: now.getMinutes(),
+      seconds: now.getSeconds(),
+    })
 
     const detectLanguage = () => {
       if (typeof window !== "undefined") {
@@ -139,6 +165,23 @@ export default function InteractiveClock() {
 
     detectLanguage()
   }, [])
+
+  // リアルタイム時計の更新
+  useEffect(() => {
+    // ドラッグ中または時計が停止中は自動更新を停止
+    if (isDragging || !isClockRunning) return
+
+    const interval = setInterval(() => {
+      const now = new Date()
+      setTime({
+        hours: now.getHours(),
+        minutes: now.getMinutes(),
+        seconds: now.getSeconds(),
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [isDragging, isClockRunning])
 
   // timeが外部から変更された時にrefを同期
   useEffect(() => {
@@ -231,6 +274,10 @@ export default function InteractiveClock() {
     return minute * 6 - 90 // SVGの座標系に合わせて調整
   }
 
+  const secondToAngle = (second: number): number => {
+    return second * 6 - 90 // SVGの座標系に合わせて調整
+  }
+
   // マウス位置から角度を計算し、時計座標系に変換
   const getAngleFromPosition = (clientX: number, clientY: number): number => {
     if (!clockRef.current) return 0
@@ -275,7 +322,7 @@ export default function InteractiveClock() {
           if (newHours < 0) newHours = 23
         }
 
-        return { ...prev, hours: newHours, minutes: newMinute }
+        return { ...prev, hours: newHours, minutes: newMinute, seconds: prev.seconds }
       })
     } else {
       // 通常の分の更新
@@ -289,6 +336,8 @@ export default function InteractiveClock() {
   // ドラッグ開始
   const handleMouseDown = useCallback((hand: "hour" | "minute") => {
     setIsDragging(hand)
+    // ドラッグ開始時に時計を自動的に停止
+    setIsClockRunning(false)
   }, [])
 
   // ドラッグ中
@@ -335,6 +384,7 @@ export default function InteractiveClock() {
 
   const hourAngle = hourToAngle(time.hours, time.minutes)
   const minuteAngle = minuteToAngle(time.minutes)
+  const secondAngle = secondToAngle(time.seconds)
 
   // AM/PM判定と表示用時間の計算
   const isAM = time.hours < 12
@@ -431,6 +481,21 @@ export default function InteractiveClock() {
             onTouchStart={() => handleMouseDown("minute")}
           />
 
+          {/* 秒針 - showSecondHandがtrueの場合のみ表示 */}
+          {showSecondHand && (
+            <line
+              x1="160"
+              y1="160"
+              x2={160 + 120 * Math.cos((secondAngle * Math.PI) / 180)}
+              y2={160 + 120 * Math.sin((secondAngle * Math.PI) / 180)}
+              stroke="#ef4444"
+              strokeWidth="2"
+              strokeLinecap="round"
+              className="drop-shadow-sm"
+              style={{ opacity: 0.8 }}
+            />
+          )}
+
           {/* 時針 */}
           <line
             x1="160"
@@ -459,6 +524,7 @@ export default function InteractiveClock() {
       >
         <div className="text-9xl font-light font-mono mb-2 tracking-wider">
           {displayHour.toString().padStart(2, "0")}:{time.minutes.toString().padStart(2, "0")}
+          {showSecondHand && `:${time.seconds.toString().padStart(2, "0")}`}
         </div>
         {!is24HourMode && <div className="text-3xl font-light opacity-70 tracking-wide">{isAM ? "AM" : "PM"}</div>}
         {is24HourMode && <div className="text-xl font-light opacity-70 tracking-wide">{t.twentyFourHourLabel}</div>}
@@ -480,6 +546,22 @@ export default function InteractiveClock() {
           {t.toggleTimeFormat} {is24HourMode ? t.twelveHourFormat : t.twentyFourHourFormat}
         </button>
 
+        {/* 秒針表示/非表示切り替えボタン */}
+        <button
+          onClick={() => setShowSecondHand(!showSecondHand)}
+          className={`${theme.buttonBg} text-gray-700 font-light py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 text-base`}
+        >
+          {t.toggleSecondHand} {showSecondHand ? t.hideSecondHand : t.showSecondHand}
+        </button>
+
+        {/* 時計の動作オン/オフ切り替えボタン */}
+        <button
+          onClick={() => setIsClockRunning(!isClockRunning)}
+          className={`${theme.buttonBg} text-gray-700 font-light py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 text-base`}
+        >
+          {t.toggleClockMovement} {isClockRunning ? t.stopClock : t.startClock}
+        </button>
+
         {/* リセットボタン */}
         <button
           onClick={() => {
@@ -487,6 +569,7 @@ export default function InteractiveClock() {
             setTime({
               hours: now.getHours(),
               minutes: now.getMinutes(),
+              seconds: now.getSeconds(),
             })
           }}
           className={`${theme.buttonBg} text-gray-700 font-light py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 text-base`}
