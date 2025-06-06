@@ -64,7 +64,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
           
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
         
       - name: Debug file structure
         run: |
@@ -74,6 +74,10 @@ jobs:
           ls -la components/
           echo "App directory contents:"
           ls -la app/
+          echo "Node modules check:"
+          ls -la node_modules/ | head -10
+          echo "Checking for tailwindcss:"
+          ls -la node_modules/.pnpm/ | grep tailwind || echo "No tailwindcss found in .pnpm"
           
       - name: Build with Next.js
         run: |
