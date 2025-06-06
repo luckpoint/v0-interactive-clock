@@ -349,36 +349,6 @@ export default function InteractiveClock() {
         <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
       </div>
 
-      {/* テーマ選択 */}
-      <div className="mb-6 bg-white/60 backdrop-blur-md rounded-xl p-4 border border-gray-200/40 shadow-sm">
-        <h3 className="text-center text-gray-700 font-light mb-3 text-base">🎨 テーマを選択</h3>
-        <div className="flex gap-3 justify-center flex-wrap">
-          {Object.entries(themes).map(([key, themeData]) => (
-            <button
-              key={key}
-              onClick={() => setCurrentTheme(key)}
-              className={`w-12 h-12 rounded-full border-4 transition-all duration-300 transform hover:scale-110 ${
-                currentTheme === key ? "border-gray-600 shadow-lg scale-105" : "border-gray-300 hover:border-gray-400"
-              }`}
-              style={{
-                background:
-                  key === "warm"
-                    ? "linear-gradient(135deg, #fbbf24, #f59e0b, #ef4444)"
-                    : key === "cool"
-                      ? "linear-gradient(135deg, #0ea5e9, #06b6d4, #10b981)"
-                      : key === "nature"
-                        ? "linear-gradient(135deg, #059669, #10b981, #84cc16)"
-                        : key === "elegant"
-                          ? "linear-gradient(135deg, #7c3aed, #8b5cf6, #6366f1)"
-                          : "linear-gradient(135deg, #ec4899, #f472b6, #fb7185)",
-              }}
-              title={themeData.name}
-              aria-label={`${themeData.name}テーマを選択`}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* アナログ時計 */}
       <div className="relative mb-8">
         <svg
@@ -501,7 +471,7 @@ export default function InteractiveClock() {
       </div>
 
       {/* ボタンエリア */}
-      <div className="flex gap-4 flex-wrap justify-center">
+      <div className="flex gap-4 flex-wrap justify-center mb-6">
         {/* 24時間/12時間表記切り替えボタン */}
         <button
           onClick={() => setIs24HourMode(!is24HourMode)}
@@ -523,6 +493,36 @@ export default function InteractiveClock() {
         >
           {t.resetButton}
         </button>
+      </div>
+
+      {/* テーマ選択 */}
+      <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 border border-gray-200/40 shadow-sm">
+        <h3 className="text-center text-gray-700 font-light mb-3 text-base">🎨 テーマを選択</h3>
+        <div className="flex gap-3 justify-center flex-wrap">
+          {Object.entries(themes).map(([key, themeData]) => (
+            <button
+              key={key}
+              onClick={() => setCurrentTheme(key)}
+              className={`w-12 h-12 rounded-full border-4 transition-all duration-300 transform hover:scale-110 ${
+                currentTheme === key ? "border-gray-600 shadow-lg scale-105" : "border-gray-300 hover:border-gray-400"
+              }`}
+              style={{
+                background:
+                  key === "warm"
+                    ? "linear-gradient(135deg, #fbbf24, #f59e0b, #ef4444)"
+                    : key === "cool"
+                      ? "linear-gradient(135deg, #0ea5e9, #06b6d4, #10b981)"
+                      : key === "nature"
+                        ? "linear-gradient(135deg, #059669, #10b981, #84cc16)"
+                        : key === "elegant"
+                          ? "linear-gradient(135deg, #7c3aed, #8b5cf6, #6366f1)"
+                          : "linear-gradient(135deg, #ec4899, #f472b6, #fb7185)",
+              }}
+              title={themeData.name}
+              aria-label={`${themeData.name}テーマを選択`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   )
