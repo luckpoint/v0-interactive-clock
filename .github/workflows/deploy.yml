@@ -31,15 +31,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-        with:
-          # Automatically inject basePath in your Next.js configuration file and disable
-          # server side image optimization (so it can work with GitHub Pages).
-          #
-          # You may remove this line if you want to manage the configuration yourself.
-          static_site_generator: next
-      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -66,6 +57,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        with:
+          # Automatically inject basePath in your Next.js configuration file and disable
+          # server side image optimization (so it can work with GitHub Pages).
+          #
+          # You may remove this line if you want to manage the configuration yourself.
+          static_site_generator: next
+        
       - name: Debug file structure
         run: |
           echo "Current directory contents:"
@@ -78,6 +78,10 @@ jobs:
           ls -la node_modules/ | head -10
           echo "Checking for tailwindcss:"
           ls -la node_modules/.pnpm/ | grep tailwind || echo "No tailwindcss found in .pnpm"
+          echo "Next.js config files:"
+          ls -la next.config.*
+          echo "Contents of next.config.js:"
+          cat next.config.js
           
       - name: Build with Next.js
         run: |

@@ -15,4 +15,4 @@ const nextConfig = {
   distDir: 'out',
 }
 
-export default nextConfig
+module.exports = nextConfig
