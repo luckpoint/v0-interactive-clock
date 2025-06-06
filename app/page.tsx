@@ -1,4 +1,4 @@
-import InteractiveClock from "../interactive-clock"
+import InteractiveClock from "@/interactive-clock"
 
 export default function Page() {
   return <InteractiveClock />
