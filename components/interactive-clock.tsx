@@ -587,13 +587,13 @@ export default function InteractiveClock() {
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleEditKeyDown}
             onBlur={handleEditComplete}
-            className="text-9xl font-light font-mono mb-2 tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500"
+            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-light font-mono mb-2 tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500"
             placeholder={showSecondHand ? "HH:MM:SS" : "HH:MM"}
             autoFocus
           />
         ) : (
           <div
-            className="text-9xl font-light font-mono mb-2 tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors"
+            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-light font-mono mb-2 tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors"
             onDoubleClick={handleEditStart}
             title="ダブルクリックで編集"
           >
@@ -601,8 +601,16 @@ export default function InteractiveClock() {
             {showSecondHand && `:${time.seconds.toString().padStart(2, "0")}`}
           </div>
         )}
-        {!is24HourMode && <div className="text-3xl font-light opacity-70 tracking-wide">{isAM ? "AM" : "PM"}</div>}
-        {is24HourMode && <div className="text-xl font-light opacity-70 tracking-wide">{t.twentyFourHourLabel}</div>}
+        {!is24HourMode && (
+          <div className="text-xl sm:text-2xl md:text-3xl font-light opacity-70 tracking-wide">
+            {isAM ? "AM" : "PM"}
+          </div>
+        )}
+        {is24HourMode && (
+          <div className="text-sm sm:text-lg md:text-xl font-light opacity-70 tracking-wide">
+            {t.twentyFourHourLabel}
+          </div>
+        )}
       </div>
 
       {/* 操作説明 */}
