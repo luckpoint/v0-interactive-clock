@@ -376,6 +376,9 @@ export default function InteractiveClock() {
     (e: React.TouchEvent) => {
       if (!isDragging || e.touches.length === 0) return
 
+      // デフォルトのスクロール動作を防止
+      e.preventDefault()
+
       const touch = e.touches[0]
       const angle = getAngleFromPosition(touch.clientX, touch.clientY)
 
@@ -472,11 +475,12 @@ export default function InteractiveClock() {
           width="320"
           height="320"
           viewBox="0 0 320 320"
-          className="mx-auto cursor-pointer select-none drop-shadow-2xl"
+          className="mx-auto cursor-pointer select-none drop-shadow-2xl touch-none"
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onTouchMove={handleTouchMove}
+          onTouchStart={(e) => isDragging && e.preventDefault()}
           onTouchEnd={handleMouseUp}
         >
           {/* 時計の影 */}
@@ -544,7 +548,10 @@ export default function InteractiveClock() {
               isDragging === "minute" ? "stroke-blue-600" : "hover:stroke-blue-600",
             )}
             onMouseDown={() => handleMouseDown("minute")}
-            onTouchStart={() => handleMouseDown("minute")}
+            onTouchStart={(e) => {
+              e.preventDefault()
+              handleMouseDown("minute")
+            }}
           />
 
           {/* 秒針 - showSecondHandがtrueの場合のみ表示 */}
@@ -576,7 +583,10 @@ export default function InteractiveClock() {
               isDragging === "hour" ? "stroke-red-600" : "hover:stroke-red-600",
             )}
             onMouseDown={() => handleMouseDown("hour")}
-            onTouchStart={() => handleMouseDown("hour")}
+            onTouchStart={(e) => {
+              e.preventDefault()
+              handleMouseDown("hour")
+            }}
           />
 
           {/* 中心の円 */}
