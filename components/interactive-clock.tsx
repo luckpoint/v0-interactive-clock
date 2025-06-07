@@ -589,13 +589,13 @@ export default function InteractiveClock() {
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleEditKeyDown}
             onBlur={handleEditComplete}
-            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-light font-mono mb-2 tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500"
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-light font-mono mb-2 tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500"
             placeholder={showSecondHand ? "HH:MM:SS" : "HH:MM"}
             autoFocus
           />
         ) : (
           <div
-            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-light font-mono mb-2 tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors"
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-light font-mono mb-2 tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors"
             onDoubleClick={handleEditStart}
             title="ダブルクリックで編集"
           >
