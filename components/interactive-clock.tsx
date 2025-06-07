@@ -449,9 +449,11 @@ export default function InteractiveClock() {
   )
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-br ${theme.background} p-4`}>
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-light text-gray-800 mb-2 flex items-center justify-center gap-3 tracking-wide">
+    <div
+      className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-br ${theme.background} p-2 sm:p-4`}
+    >
+      <div className="text-center mb-4 sm:mb-6 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-800 mb-2 flex items-center justify-center gap-3 tracking-wide">
           🕐 {t.title}
         </h1>
         <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
