@@ -32,6 +32,7 @@ interface Theme {
   digitalBg: string
   buttonBg: string
   accent: string
+  secondHand: string
 }
 
 // テーマデータ
@@ -45,6 +46,7 @@ const themes: Record<string, Theme> = {
     digitalBg: "bg-white/80",
     buttonBg: "bg-white/70 hover:bg-white/90",
     accent: "#f59e0b",
+    secondHand: "#f59e0b", // オレンジ系
   },
   cool: {
     name: "クール",
@@ -55,6 +57,7 @@ const themes: Record<string, Theme> = {
     digitalBg: "bg-blue-50/80",
     buttonBg: "bg-blue-50/70 hover:bg-blue-50/90",
     accent: "#0ea5e9",
+    secondHand: "#0ea5e9", // 青系
   },
   nature: {
     name: "ナチュラル",
@@ -65,6 +68,7 @@ const themes: Record<string, Theme> = {
     digitalBg: "bg-green-50/80",
     buttonBg: "bg-green-50/70 hover:bg-green-50/90",
     accent: "#059669",
+    secondHand: "#059669", // 緑系
   },
   elegant: {
     name: "エレガント",
@@ -75,6 +79,7 @@ const themes: Record<string, Theme> = {
     digitalBg: "bg-purple-50/80",
     buttonBg: "bg-purple-50/70 hover:bg-purple-50/90",
     accent: "#7c3aed",
+    secondHand: "#7c3aed", // 紫系
   },
   cute: {
     name: "キュート",
@@ -85,6 +90,7 @@ const themes: Record<string, Theme> = {
     digitalBg: "bg-pink-50/80",
     buttonBg: "bg-pink-50/70 hover:bg-pink-50/90",
     accent: "#ec4899",
+    secondHand: "#ec4899", // ピンク系
   },
 }
 
@@ -548,7 +554,7 @@ export default function InteractiveClock() {
               y1="160"
               x2={160 + 120 * Math.cos((secondAngle * Math.PI) / 180)}
               y2={160 + 120 * Math.sin((secondAngle * Math.PI) / 180)}
-              stroke="#ef4444"
+              stroke={theme.secondHand}
               strokeWidth="2"
               strokeLinecap="round"
               className="drop-shadow-sm"
