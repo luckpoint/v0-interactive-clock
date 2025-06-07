@@ -137,6 +137,8 @@ export default function InteractiveClock() {
   const [currentTheme, setCurrentTheme] = useState<string>("warm")
   const [showSecondHand, setShowSecondHand] = useState<boolean>(true) // 秒針表示の状態
   const [isClockRunning, setIsClockRunning] = useState<boolean>(true) // 時計の動作状態
+  const [isEditing, setIsEditing] = useState<boolean>(false) // デジタル時計の編集モード
+  const [editValue, setEditValue] = useState<string>("") // 編集中の値
 
   const clockRef = useRef<SVGSVGElement>(null)
   const prevMinuteRef = useRef<number>(10) // 前回の分の値を追跡
@@ -168,8 +170,8 @@ export default function InteractiveClock() {
 
   // リアルタイム時計の更新
   useEffect(() => {
-    // ドラッグ中または時計が停止中は自動更新を停止
-    if (isDragging || !isClockRunning) return
+    // ドラッグ中、時計が停止中、または編集中は自動更新を停止
+    if (isDragging || !isClockRunning || isEditing) return
 
     const interval = setInterval(() => {
       const now = new Date()
@@ -181,7 +183,7 @@ export default function InteractiveClock() {
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [isDragging, isClockRunning])
+  }, [isDragging, isClockRunning, isEditing])
 
   // timeが外部から変更された時にrefを同期
   useEffect(() => {
@@ -390,6 +392,62 @@ export default function InteractiveClock() {
   const isAM = time.hours < 12
   const displayHour = is24HourMode ? time.hours : time.hours % 12 === 0 ? 12 : time.hours % 12
 
+  // デジタル時計の編集開始
+  const handleEditStart = useCallback(() => {
+    setIsEditing(true)
+    setIsClockRunning(false) // 編集開始時に時計を停止
+
+    // 現在の時刻を編集用フォーマットに変換
+    const currentTimeString = showSecondHand
+      ? `${displayHour.toString().padStart(2, "0")}:${time.minutes.toString().padStart(2, "0")}:${time.seconds.toString().padStart(2, "0")}`
+      : `${displayHour.toString().padStart(2, "0")}:${time.minutes.toString().padStart(2, "0")}`
+
+    setEditValue(currentTimeString)
+  }, [displayHour, time.minutes, time.seconds, showSecondHand])
+
+  // デジタル時計の編集完了
+  const handleEditComplete = useCallback(() => {
+    if (!isEditing) return
+
+    // 入力値を解析して時間を更新
+    const timePattern = showSecondHand ? /^(\d{1,2}):(\d{1,2}):(\d{1,2})$/ : /^(\d{1,2}):(\d{1,2})$/
+    const match = editValue.match(timePattern)
+
+    if (match) {
+      let hours = Number.parseInt(match[1], 10)
+      const minutes = Number.parseInt(match[2], 10)
+      const seconds = showSecondHand ? Number.parseInt(match[3], 10) : time.seconds
+
+      // 12時間表記の場合、24時間表記に変換
+      if (!is24HourMode) {
+        if (hours === 12 && isAM) {
+          hours = 0 // 12 AM = 0時
+        } else if (hours !== 12 && !isAM) {
+          hours += 12 // PM時間（12以外）は+12
+        }
+      }
+
+      // 有効な時間かチェック
+      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59 && seconds >= 0 && seconds <= 59) {
+        setTime({ hours, minutes, seconds })
+      }
+    }
+
+    setIsEditing(false)
+  }, [editValue, showSecondHand, is24HourMode, isAM, time.seconds])
+
+  // キーボードイベントハンドラー
+  const handleEditKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        handleEditComplete()
+      } else if (e.key === "Escape") {
+        setIsEditing(false) // ESCキーで編集をキャンセル
+      }
+    },
+    [handleEditComplete],
+  )
+
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-br ${theme.background} p-4`}>
       <div className="text-center mb-8">
@@ -522,10 +580,27 @@ export default function InteractiveClock() {
       <div
         className={`${theme.digitalBg} backdrop-blur-md text-gray-800 rounded-2xl p-6 text-center border border-gray-200/50 shadow-lg mb-6`}
       >
-        <div className="text-9xl font-light font-mono mb-2 tracking-wider">
-          {displayHour.toString().padStart(2, "0")}:{time.minutes.toString().padStart(2, "0")}
-          {showSecondHand && `:${time.seconds.toString().padStart(2, "0")}`}
-        </div>
+        {isEditing ? (
+          <input
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleEditKeyDown}
+            onBlur={handleEditComplete}
+            className="text-9xl font-light font-mono mb-2 tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500"
+            placeholder={showSecondHand ? "HH:MM:SS" : "HH:MM"}
+            autoFocus
+          />
+        ) : (
+          <div
+            className="text-9xl font-light font-mono mb-2 tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors"
+            onDoubleClick={handleEditStart}
+            title="ダブルクリックで編集"
+          >
+            {displayHour.toString().padStart(2, "0")}:{time.minutes.toString().padStart(2, "0")}
+            {showSecondHand && `:${time.seconds.toString().padStart(2, "0")}`}
+          </div>
+        )}
         {!is24HourMode && <div className="text-3xl font-light opacity-70 tracking-wide">{isAM ? "AM" : "PM"}</div>}
         {is24HourMode && <div className="text-xl font-light opacity-70 tracking-wide">{t.twentyFourHourLabel}</div>}
       </div>

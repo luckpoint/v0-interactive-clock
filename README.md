@@ -24,7 +24,7 @@ Visit the live demo at: [https://luckpoint.github.io/interactive-clock/](https:/
 
 ### Installation
 
-```bash
+\`\`\`bash
 # Clone the repository
 git clone https://github.com/yourusername/interactive-clock.git
 cd interactive-clock
@@ -34,17 +34,17 @@ npm install
 
 # Start development server
 npm run dev
-```
+\`\`\`
 
 ### Building for Production
 
-```bash
+\`\`\`bash
 # Build the project
 npm run build
 
 # Preview the production build
 npm run preview
-```
+\`\`\`
 
 ## 🌐 Deploy to GitHub Pages
 
