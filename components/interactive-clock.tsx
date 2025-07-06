@@ -270,28 +270,23 @@ export default function InteractiveClock() {
             autoFocus
           />
         ) : (
-          <div
-            className={`font-light font-mono mb-2 tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors ${
-              deviceInfo.isMobile ? 'text-2xl' : 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
-            }`}
-            onDoubleClick={handleEditStart}
-            title="ダブルクリックで編集"
-          >
-            {formatTime(displayHour, time.minutes, time.seconds, is24HourMode, showSecondHand)}
-          </div>
-        )}
-        {!is24HourMode && (
-          <div className={`font-light opacity-70 tracking-wide ${
-            deviceInfo.isMobile ? 'text-sm' : 'text-xl sm:text-2xl md:text-3xl'
-          }`}>
-            {isAMTime ? "AM" : "PM"}
-          </div>
-        )}
-        {is24HourMode && (
-          <div className={`font-light opacity-70 tracking-wide ${
-            deviceInfo.isMobile ? 'text-xs' : 'text-sm sm:text-lg md:text-xl'
-          }`}>
-            {t.twentyFourHourLabel}
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div
+              className={`font-light font-mono tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors ${
+                deviceInfo.isMobile ? 'text-2xl' : 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
+              }`}
+              onDoubleClick={handleEditStart}
+              title="ダブルクリックで編集"
+            >
+              {formatTime(displayHour, time.minutes, time.seconds, is24HourMode, showSecondHand)}
+            </div>
+            {!is24HourMode && (
+              <div className={`font-light opacity-70 tracking-wide ${
+                deviceInfo.isMobile ? 'text-sm' : 'text-xl sm:text-2xl md:text-3xl'
+              }`}>
+                {isAMTime ? "AM" : "PM"}
+              </div>
+            )}
           </div>
         )}
       </div>
