@@ -1,466 +1,111 @@
 "use client"
 
 import type * as React from "react"
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useRef } from "react"
 import { cn } from "../lib/utils"
-
-// 多言語対応の翻訳定義
-interface Translations {
-  title: string
-  hourHandInstruction: string
-  minuteHandInstruction: string
-  toggleTimeFormat: string
-  resetButton: string
-  twelveHourFormat: string
-  twentyFourHourFormat: string
-  twentyFourHourLabel: string
-  toggleSecondHand: string
-  showSecondHand: string
-  hideSecondHand: string
-  toggleClockMovement: string
-  startClock: string
-  stopClock: string
-}
-
-// テーマの型定義
-interface Theme {
-  name: string
-  background: string
-  clockFace: string
-  hourHand: string
-  minuteHand: string
-  digitalBg: string
-  buttonBg: string
-  accent: string
-  secondHand: string
-}
-
-// テーマデータ
-const themes: Record<string, Theme> = {
-  warm: {
-    name: "ウォーム",
-    background: "from-amber-50 via-orange-50 to-rose-100",
-    clockFace: "white",
-    hourHand: "#ef4444",
-    minuteHand: "#3b82f6",
-    digitalBg: "bg-white/80",
-    buttonBg: "bg-white/70 hover:bg-white/90",
-    accent: "#f59e0b",
-    secondHand: "#f59e0b", // オレンジ系
-  },
-  cool: {
-    name: "クール",
-    background: "from-blue-50 via-cyan-50 to-teal-100",
-    clockFace: "white",
-    hourHand: "#0ea5e9",
-    minuteHand: "#06b6d4",
-    digitalBg: "bg-blue-50/80",
-    buttonBg: "bg-blue-50/70 hover:bg-blue-50/90",
-    accent: "#0ea5e9",
-    secondHand: "#0ea5e9", // 青系
-  },
-  nature: {
-    name: "ナチュラル",
-    background: "from-green-50 via-emerald-50 to-lime-100",
-    clockFace: "white",
-    hourHand: "#059669",
-    minuteHand: "#10b981",
-    digitalBg: "bg-green-50/80",
-    buttonBg: "bg-green-50/70 hover:bg-green-50/90",
-    accent: "#059669",
-    secondHand: "#059669", // 緑系
-  },
-  elegant: {
-    name: "エレガント",
-    background: "from-purple-50 via-violet-50 to-indigo-100",
-    clockFace: "white",
-    hourHand: "#7c3aed",
-    minuteHand: "#8b5cf6",
-    digitalBg: "bg-purple-50/80",
-    buttonBg: "bg-purple-50/70 hover:bg-purple-50/90",
-    accent: "#7c3aed",
-    secondHand: "#7c3aed", // 紫系
-  },
-  cute: {
-    name: "キュート",
-    background: "from-pink-50 via-rose-50 to-red-100",
-    clockFace: "white",
-    hourHand: "#ec4899",
-    minuteHand: "#f472b6",
-    digitalBg: "bg-pink-50/80",
-    buttonBg: "bg-pink-50/70 hover:bg-pink-50/90",
-    accent: "#ec4899",
-    secondHand: "#ec4899", // ピンク系
-  },
-}
-
-const translations: Record<string, Translations> = {
-  en: {
-    title: "Interactive Clock",
-    hourHandInstruction: "🔴 Drag the red hand (hour hand) to set the time",
-    minuteHandInstruction: "🔵 Drag the blue hand (minute hand) to set the minutes",
-    toggleTimeFormat: "🕒",
-    resetButton: "⏰ Reset to Current Time",
-    twelveHourFormat: "12-Hour Format",
-    twentyFourHourFormat: "24-Hour Format",
-    twentyFourHourLabel: "24-Hour Format",
-    toggleSecondHand: "⏱️",
-    showSecondHand: "Show Second Hand",
-    hideSecondHand: "Hide Second Hand",
-    toggleClockMovement: "⚙️",
-    startClock: "Start Clock",
-    stopClock: "Stop Clock",
-  },
-  ja: {
-    title: "インタラクティブ時計",
-    hourHandInstruction: "🔴 赤い針（時針）をドラッグして時間を設定",
-    minuteHandInstruction: "🔵 青い針（分針）をドラッグして分を設定",
-    toggleTimeFormat: "🕒",
-    resetButton: "⏰ 現在時刻にリセット",
-    twelveHourFormat: "12時間表記",
-    twentyFourHourFormat: "24時間表記",
-    twentyFourHourLabel: "24時間表記",
-    toggleSecondHand: "⏱️",
-    showSecondHand: "秒針を表示",
-    hideSecondHand: "秒針を非表示",
-    toggleClockMovement: "⚙️",
-    startClock: "時計を動かす",
-    stopClock: "時計を止める",
-  },
-}
-
-interface Time {
-  hours: number // 0-23の24時間形式
-  minutes: number // 0-59
-  seconds: number // 0-59
-}
+import { themes, getThemeGradient, type ThemeKey } from "../lib/themes"
+import { getTranslations } from "../lib/i18n"
+import { hourToAngle, minuteToAngle, secondToAngle, getDisplayHour, isAM, formatTime } from "../lib/clock-utils"
+import { CLOCK_DIMENSIONS } from "../lib/constants"
+import { useClock } from "../hooks/useClock"
+import { useClockDrag } from "../hooks/useClockDrag"
+import { useClockEdit } from "../hooks/useClockEdit"
+import { useMobileOptimization } from "../hooks/useMobileOptimization"
+import ResponsiveContainer from "./ResponsiveContainer"
+import MobileOptimizedClock from "./MobileOptimizedClock"
+import MobileControlPanel from "./MobileControlPanel"
 
 export default function InteractiveClock() {
-  const [time, setTime] = useState<Time>({ hours: 0, minutes: 0, seconds: 0 })
-  const [isDragging, setIsDragging] = useState<"hour" | "minute" | null>(null)
-  const [is24HourMode, setIs24HourMode] = useState<boolean>(false) // 24時間表記モード
-  const [language, setLanguage] = useState<string>("en") // デフォルトは英語
-  const [currentTheme, setCurrentTheme] = useState<string>("warm")
-  const [showSecondHand, setShowSecondHand] = useState<boolean>(true) // 秒針表示の状態
-  const [isClockRunning, setIsClockRunning] = useState<boolean>(true) // 時計の動作状態
-  const [isEditing, setIsEditing] = useState<boolean>(false) // デジタル時計の編集モード
-  const [editValue, setEditValue] = useState<string>("") // 編集中の値
-
   const clockRef = useRef<SVGSVGElement>(null)
-  const prevMinuteRef = useRef<number>(10) // 前回の分の値を追跡
-  const prevHourAngleRef = useRef<number>(0) // 前回の時間針の角度を追跡
+  
+  const clockState = useClock()
+  const mobileOptimization = useMobileOptimization()
+  const {
+    time,
+    isDragging,
+    is24HourMode,
+    language,
+    currentTheme,
+    showSecondHand,
+    isClockRunning,
+    isEditing,
+    editValue,
+    prevMinuteRef,
+    prevHourAngleRef,
+    setTime,
+    setIsDragging,
+    setIs24HourMode,
+    setCurrentTheme,
+    setShowSecondHand,
+    setIsClockRunning,
+    setIsEditing,
+    setEditValue,
+    updateTimeWithMinuteRotation,
+    resetToCurrentTime,
+  } = clockState
 
   // 現在の翻訳を取得
-  const t = translations[language] || translations.en
+  const t = getTranslations(language)
   const theme = themes[currentTheme]
+  const { deviceInfo, triggerHapticFeedback } = mobileOptimization
 
-  // クライアントサイドでのみ実行
-  useEffect(() => {
-    const now = new Date()
-    setTime({
-      hours: now.getHours(),
-      minutes: now.getMinutes(),
-      seconds: now.getSeconds(),
-    })
+  // ドラッグハンドラーの初期化
+  const { handleMouseDown, handleMouseMove, handleMouseUp, handleTouchMove } = useClockDrag({
+    isDragging,
+    currentHours: time.hours,
+    prevHourAngle: prevHourAngleRef.current,
+    setTime,
+    setIsDragging,
+    setIsClockRunning,
+    updateTimeWithMinuteRotation,
+  })
 
-    const detectLanguage = () => {
-      if (typeof window !== "undefined") {
-        const browserLang = navigator.language || navigator.languages?.[0] || "en"
-        const langCode = browserLang.toLowerCase().startsWith("ja") ? "ja" : "en"
-        setLanguage(langCode)
-      }
-    }
+  // 編集ハンドラーの初期化
+  const { handleEditStart, handleEditComplete, handleEditKeyDown } = useClockEdit({
+    time,
+    is24HourMode,
+    showSecondHand,
+    isEditing,
+    editValue,
+    setTime,
+    setIsEditing,
+    setEditValue,
+    setIsClockRunning,
+  })
 
-    detectLanguage()
-  }, [])
-
-  // リアルタイム時計の更新
-  useEffect(() => {
-    // ドラッグ中、時計が停止中、または編集中は自動更新を停止
-    if (isDragging || !isClockRunning || isEditing) return
-
-    const interval = setInterval(() => {
-      const now = new Date()
-      setTime({
-        hours: now.getHours(),
-        minutes: now.getMinutes(),
-        seconds: now.getSeconds(),
-      })
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [isDragging, isClockRunning, isEditing])
-
-  // timeが外部から変更された時にrefを同期
-  useEffect(() => {
-    prevMinuteRef.current = time.minutes
-    const currentHourAngle = ((time.hours % 12) * 30 + time.minutes * 0.5) % 360
-    prevHourAngleRef.current = currentHourAngle
-  }, [time.minutes, time.hours])
-
-  const angleToMinute = (angle: number): number => {
-    // 入力角度が時計座標系であることを前提として処理
-    const normalizedAngle = (angle + 360) % 360
-    return Math.round(normalizedAngle / 6) % 60
-  }
-
-  // 時間針の角度から時間と分を計算（12時を通過した際のAM/PM切り替えも検出）
-  const angleToHourAndMinute = useCallback(
-    (angle: number): { hours: number; minutes: number } => {
-      // 時計座標系の角度を正規化
-      const normalizedAngle = (angle + 360) % 360
-
-      // 時間針の角度から総分数を計算（1度 = 2分）
-      const totalMinutes = Math.round(normalizedAngle * 2) % 720 // 12時間 = 720分
-
-      // 時間と分に分解
-      const hours = Math.floor(totalMinutes / 60)
-      const minutes = totalMinutes % 60
-
-      // 前回の角度との差分で12時を通過したかを判定
-      const prevAngle = prevHourAngleRef.current
-      const currentAngle = normalizedAngle
-
-      // 12時を通過したかを検出（角度の差分が大きい場合）
-      const crossedTwelve = Math.abs(currentAngle - prevAngle) > 180
-      let newHours = time.hours
-
-      if (crossedTwelve) {
-        if (prevAngle > 180 && currentAngle < 180) {
-          // 右回り（11時から12時への通過）
-          const currentHour24 = time.hours
-          if (currentHour24 === 11)
-            newHours = 12 // 11AM → 12PM
-          else if (currentHour24 === 23)
-            newHours = 0 // 11PM → 12AM
-          else newHours = currentHour24 + 1
-        } else if (prevAngle < 180 && currentAngle > 180) {
-          // 左回り（12時から11時への通過）
-          const currentHour24 = time.hours
-          if (currentHour24 === 12)
-            newHours = 11 // 12PM → 11AM
-          else if (currentHour24 === 0)
-            newHours = 23 // 12AM → 11PM
-          else newHours = currentHour24 - 1
-        } else {
-          // 通常のAM/PM切り替え
-          const isCurrentlyPM = time.hours >= 12
-          newHours = isCurrentlyPM ? hours : hours + 12
-        }
-      } else {
-        // 12時を通過していない通常の動き
-        const isCurrentlyPM = time.hours >= 12
-        if (isCurrentlyPM && hours < 12) {
-          newHours = hours + 12
-        } else if (!isCurrentlyPM && hours === 12) {
-          newHours = 0
-        } else if (!isCurrentlyPM && hours < 12) {
-          newHours = hours
-        } else {
-          newHours = hours
-        }
-      }
-
-      // 24時間の範囲内に収める
-      newHours = ((newHours % 24) + 24) % 24
-
-      // 前回の角度を更新
-      prevHourAngleRef.current = normalizedAngle
-
-      return { hours: newHours, minutes }
-    },
-    [time.hours],
-  )
-
-  // 時間から角度への変換
-  const hourToAngle = (hour: number, minute: number): number => {
-    const hourAngle = (hour % 12) * 30 + minute * 0.5
-    return hourAngle - 90 // SVGの座標系に合わせて調整
-  }
-
-  const minuteToAngle = (minute: number): number => {
-    return minute * 6 - 90 // SVGの座標系に合わせて調整
-  }
-
-  const secondToAngle = (second: number): number => {
-    return second * 6 - 90 // SVGの座標系に合わせて調整
-  }
-
-  // マウス位置から角度を計算し、時計座標系に変換
-  const getAngleFromPosition = (clientX: number, clientY: number): number => {
-    if (!clockRef.current) return 0
-
-    const rect = clockRef.current.getBoundingClientRect()
-    const centerX = rect.left + rect.width / 2
-    const centerY = rect.top + rect.height / 2
-
-    const deltaX = clientX - centerX
-    const deltaY = clientY - centerY
-
-    // Math.atan2は数学座標系（右が0度）で角度を返す
-    const mathAngle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
-
-    // 数学座標系から時計座標系に変換（12時が0度、時計回りが正）
-    // mathAngle: 右=0度, 上=-90度, 左=±180度, 下=90度
-    // clockAngle: 上=0度, 右=90度, 下=180度, 左=270度
-    const clockAngle = (mathAngle + 90 + 360) % 360
-
-    return clockAngle
-  }
-
-  // 分針の回転方向を検出して時間を更新
-  const updateTimeWithMinuteRotation = useCallback((newMinute: number) => {
-    const prevMinute = prevMinuteRef.current
-
-    // 12の位置（0分）を通過したかを検出
-    const crossedTwelve =
-      (prevMinute >= 55 && newMinute <= 5) || // 右回り（59→0）
-      (prevMinute <= 5 && newMinute >= 55) // 左回り（0→59）
-
-    if (crossedTwelve) {
-      setTime((prev) => {
-        let newHours = prev.hours
-
-        if (prevMinute >= 55 && newMinute <= 5) {
-          // 右回り: 時間を進める
-          newHours = (prev.hours + 1) % 24
-        } else if (prevMinute <= 5 && newMinute >= 55) {
-          // 左回り: 時間を戻す
-          newHours = prev.hours - 1
-          if (newHours < 0) newHours = 23
-        }
-
-        return { ...prev, hours: newHours, minutes: newMinute, seconds: prev.seconds }
-      })
+  // テーマ変更ハンドラー（スワイプ対応）
+  const handleThemeChange = (direction: 'next' | 'prev') => {
+    const themeKeys = Object.keys(themes) as ThemeKey[]
+    const currentIndex = themeKeys.indexOf(currentTheme)
+    let nextIndex: number
+    
+    if (direction === 'next') {
+      nextIndex = (currentIndex + 1) % themeKeys.length
     } else {
-      // 通常の分の更新
-      setTime((prev) => ({ ...prev, minutes: newMinute }))
+      nextIndex = currentIndex === 0 ? themeKeys.length - 1 : currentIndex - 1
     }
+    
+    setCurrentTheme(themeKeys[nextIndex])
+    triggerHapticFeedback('medium')
+  }
 
-    // 前回の分の値を更新
-    prevMinuteRef.current = newMinute
-  }, [])
+  // タイムフォーマット切り替えハンドラー
+  const handleTimeFormatToggle = () => {
+    setIs24HourMode(!is24HourMode)
+    triggerHapticFeedback('light')
+  }
 
-  // ドラッグ開始
-  const handleMouseDown = useCallback((hand: "hour" | "minute") => {
-    setIsDragging(hand)
-    // ドラッグ開始時に時計を自動的に停止
-    setIsClockRunning(false)
-  }, [])
-
-  // ドラッグ中
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!isDragging) return
-
-      const angle = getAngleFromPosition(e.clientX, e.clientY)
-
-      if (isDragging === "hour") {
-        const { hours, minutes } = angleToHourAndMinute(angle)
-        setTime((prev) => ({ ...prev, hours, minutes }))
-      } else if (isDragging === "minute") {
-        const newMinute = angleToMinute(angle)
-        updateTimeWithMinuteRotation(newMinute)
-      }
-    },
-    [isDragging, time.hours, updateTimeWithMinuteRotation, angleToHourAndMinute],
-  )
-
-  // ドラッグ終了
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(null)
-  }, [])
-
-  // タッチイベント対応
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!isDragging || e.touches.length === 0) return
-
-      // デフォルトのスクロール動作を防止
-      e.preventDefault()
-
-      const touch = e.touches[0]
-      const angle = getAngleFromPosition(touch.clientX, touch.clientY)
-
-      if (isDragging === "hour") {
-        const { hours, minutes } = angleToHourAndMinute(angle)
-        setTime((prev) => ({ ...prev, hours, minutes }))
-      } else if (isDragging === "minute") {
-        const newMinute = angleToMinute(angle)
-        updateTimeWithMinuteRotation(newMinute)
-      }
-    },
-    [isDragging, time.hours, updateTimeWithMinuteRotation, angleToHourAndMinute],
-  )
-
+  // 角度計算の結果を取得
   const hourAngle = hourToAngle(time.hours, time.minutes)
   const minuteAngle = minuteToAngle(time.minutes)
   const secondAngle = secondToAngle(time.seconds)
 
   // AM/PM判定と表示用時間の計算
-  const isAM = time.hours < 12
-  const displayHour = is24HourMode ? time.hours : time.hours % 12 === 0 ? 12 : time.hours % 12
-
-  // デジタル時計の編集開始
-  const handleEditStart = useCallback(() => {
-    setIsEditing(true)
-    setIsClockRunning(false) // 編集開始時に時計を停止
-
-    // 現在の時刻を編集用フォーマットに変換
-    const currentTimeString = showSecondHand
-      ? `${displayHour.toString().padStart(2, "0")}:${time.minutes.toString().padStart(2, "0")}:${time.seconds.toString().padStart(2, "0")}`
-      : `${displayHour.toString().padStart(2, "0")}:${time.minutes.toString().padStart(2, "0")}`
-
-    setEditValue(currentTimeString)
-  }, [displayHour, time.minutes, time.seconds, showSecondHand])
-
-  // デジタル時計の編集完了
-  const handleEditComplete = useCallback(() => {
-    if (!isEditing) return
-
-    // 入力値を解析して時間を更新
-    const timePattern = showSecondHand ? /^(\d{1,2}):(\d{1,2}):(\d{1,2})$/ : /^(\d{1,2}):(\d{1,2})$/
-    const match = editValue.match(timePattern)
-
-    if (match) {
-      let hours = Number.parseInt(match[1], 10)
-      const minutes = Number.parseInt(match[2], 10)
-      const seconds = showSecondHand ? Number.parseInt(match[3], 10) : time.seconds
-
-      // 12時間表記の場合、24時間表記に変換
-      if (!is24HourMode) {
-        if (hours === 12 && isAM) {
-          hours = 0 // 12 AM = 0時
-        } else if (hours !== 12 && !isAM) {
-          hours += 12 // PM時間（12以外）は+12
-        }
-      }
-
-      // 有効な時間かチェック
-      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59 && seconds >= 0 && seconds <= 59) {
-        setTime({ hours, minutes, seconds })
-      }
-    }
-
-    setIsEditing(false)
-  }, [editValue, showSecondHand, is24HourMode, isAM, time.seconds])
-
-  // キーボードイベントハンドラー
-  const handleEditKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
-        handleEditComplete()
-      } else if (e.key === "Escape") {
-        setIsEditing(false) // ESCキーで編集をキャンセル
-      }
-    },
-    [handleEditComplete],
-  )
+  const isAMTime = isAM(time.hours)
+  const displayHour = getDisplayHour(time.hours, is24HourMode)
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-br ${theme.background} p-2 sm:p-4`}
-    >
+    <ResponsiveContainer className={`bg-gradient-to-br ${theme.background}`}>
       <div className="text-center mb-4 sm:mb-6 md:mb-8">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-800 mb-2 flex items-center justify-center gap-3 tracking-wide">
           🕐 {t.title}
@@ -469,32 +114,40 @@ export default function InteractiveClock() {
       </div>
 
       {/* アナログ時計 */}
-      <div className="relative mb-8">
-        <svg
-          ref={clockRef}
-          width="320"
-          height="320"
-          viewBox="0 0 320 320"
-          className="mx-auto cursor-pointer select-none drop-shadow-2xl touch-none"
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onTouchMove={handleTouchMove}
-          onTouchStart={(e) => isDragging && e.preventDefault()}
-          onTouchEnd={handleMouseUp}
-        >
+      <MobileOptimizedClock
+        clockRef={clockRef}
+        width={CLOCK_DIMENSIONS.WIDTH}
+        height={CLOCK_DIMENSIONS.HEIGHT}
+        onMouseMove={(e) => handleMouseMove(e, clockRef)}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchMove={(e) => handleTouchMove(e, clockRef)}
+        onTouchStart={(e) => isDragging && e.preventDefault()}
+        onTouchEnd={handleMouseUp}
+        isDragging={isDragging}
+        onThemeChange={handleThemeChange}
+        onTimeFormatToggle={handleTimeFormatToggle}
+        currentTheme={currentTheme}
+      >
           {/* 時計の影 */}
-          <circle cx="165" cy="165" r="150" fill="rgba(0,0,0,0.1)" />
+          <circle cx="165" cy="165" r={CLOCK_DIMENSIONS.RADIUS} fill="rgba(0,0,0,0.1)" />
 
           {/* 時計の外枠 */}
-          <circle cx="160" cy="160" r="150" fill="white" stroke="#e2e8f0" strokeWidth="3" />
+          <circle
+            cx={CLOCK_DIMENSIONS.CENTER.x}
+            cy={CLOCK_DIMENSIONS.CENTER.y}
+            r={CLOCK_DIMENSIONS.RADIUS}
+            fill="white"
+            stroke="#e2e8f0"
+            strokeWidth="3"
+          />
 
           {/* 時計の数字 */}
           {Array.from({ length: 12 }, (_, i) => {
             const number = i === 0 ? 12 : i
             const angle = i * 30 - 90
-            const x = 160 + 120 * Math.cos((angle * Math.PI) / 180)
-            const y = 160 + 120 * Math.sin((angle * Math.PI) / 180)
+            const x = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.NUMBER_RADIUS * Math.cos((angle * Math.PI) / 180)
+            const y = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.NUMBER_RADIUS * Math.sin((angle * Math.PI) / 180)
 
             return (
               <text
@@ -513,33 +166,33 @@ export default function InteractiveClock() {
           {/* 時間の目盛り */}
           {Array.from({ length: 12 }, (_, i) => {
             const angle = i * 30
-            const x1 = 160 + 140 * Math.cos(((angle - 90) * Math.PI) / 180)
-            const y1 = 160 + 140 * Math.sin(((angle - 90) * Math.PI) / 180)
-            const x2 = 160 + 125 * Math.cos(((angle - 90) * Math.PI) / 180)
-            const y2 = 160 + 125 * Math.sin(((angle - 90) * Math.PI) / 180)
+            const x1 = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_MARK_OUTER * Math.cos(((angle - 90) * Math.PI) / 180)
+            const y1 = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_MARK_OUTER * Math.sin(((angle - 90) * Math.PI) / 180)
+            const x2 = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_MARK_INNER * Math.cos(((angle - 90) * Math.PI) / 180)
+            const y2 = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_MARK_INNER * Math.sin(((angle - 90) * Math.PI) / 180)
 
             return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#cbd5e1" strokeWidth="2" />
           })}
 
           {/* 分の目盛り */}
           {Array.from({ length: 60 }, (_, i) => {
-            if (i % 5 === 0) return null // 時間の目盛りと重複を避ける
+            if (i % 5 === 0) return null
 
             const angle = i * 6
-            const x1 = 160 + 140 * Math.cos(((angle - 90) * Math.PI) / 180)
-            const y1 = 160 + 140 * Math.sin(((angle - 90) * Math.PI) / 180)
-            const x2 = 160 + 133 * Math.cos(((angle - 90) * Math.PI) / 180)
-            const y2 = 160 + 133 * Math.sin(((angle - 90) * Math.PI) / 180)
+            const x1 = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_MARK_OUTER * Math.cos(((angle - 90) * Math.PI) / 180)
+            const y1 = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_MARK_OUTER * Math.sin(((angle - 90) * Math.PI) / 180)
+            const x2 = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_MARK_INNER * Math.cos(((angle - 90) * Math.PI) / 180)
+            const y2 = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_MARK_INNER * Math.sin(((angle - 90) * Math.PI) / 180)
 
             return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#e2e8f0" strokeWidth="1" />
           })}
 
           {/* 分針 */}
           <line
-            x1="160"
-            y1="160"
-            x2={160 + 110 * Math.cos((minuteAngle * Math.PI) / 180)}
-            y2={160 + 110 * Math.sin((minuteAngle * Math.PI) / 180)}
+            x1={CLOCK_DIMENSIONS.CENTER.x}
+            y1={CLOCK_DIMENSIONS.CENTER.y}
+            x2={CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.cos((minuteAngle * Math.PI) / 180)}
+            y2={CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.sin((minuteAngle * Math.PI) / 180)}
             stroke={theme.minuteHand}
             strokeWidth="5"
             strokeLinecap="round"
@@ -557,10 +210,10 @@ export default function InteractiveClock() {
           {/* 秒針 - showSecondHandがtrueの場合のみ表示 */}
           {showSecondHand && (
             <line
-              x1="160"
-              y1="160"
-              x2={160 + 120 * Math.cos((secondAngle * Math.PI) / 180)}
-              y2={160 + 120 * Math.sin((secondAngle * Math.PI) / 180)}
+              x1={CLOCK_DIMENSIONS.CENTER.x}
+              y1={CLOCK_DIMENSIONS.CENTER.y}
+              x2={CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.SECOND_HAND_LENGTH * Math.cos((secondAngle * Math.PI) / 180)}
+              y2={CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.SECOND_HAND_LENGTH * Math.sin((secondAngle * Math.PI) / 180)}
               stroke={theme.secondHand}
               strokeWidth="2"
               strokeLinecap="round"
@@ -571,10 +224,10 @@ export default function InteractiveClock() {
 
           {/* 時針 */}
           <line
-            x1="160"
-            y1="160"
-            x2={160 + 80 * Math.cos((hourAngle * Math.PI) / 180)}
-            y2={160 + 80 * Math.sin((hourAngle * Math.PI) / 180)}
+            x1={CLOCK_DIMENSIONS.CENTER.x}
+            y1={CLOCK_DIMENSIONS.CENTER.y}
+            x2={CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.cos((hourAngle * Math.PI) / 180)}
+            y2={CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.sin((hourAngle * Math.PI) / 180)}
             stroke={theme.hourHand}
             strokeWidth="7"
             strokeLinecap="round"
@@ -590,13 +243,20 @@ export default function InteractiveClock() {
           />
 
           {/* 中心の円 */}
-          <circle cx="160" cy="160" r="10" fill="#374151" className="drop-shadow-sm" />
-        </svg>
-      </div>
+          <circle
+            cx={CLOCK_DIMENSIONS.CENTER.x}
+            cy={CLOCK_DIMENSIONS.CENTER.y}
+            r={CLOCK_DIMENSIONS.CENTER_DOT_RADIUS}
+            fill="#374151"
+            className="drop-shadow-sm"
+          />
+      </MobileOptimizedClock>
 
       {/* デジタル表示 */}
       <div
-        className={`${theme.digitalBg} backdrop-blur-md text-gray-800 rounded-2xl p-6 text-center border border-gray-200/50 shadow-lg mb-6`}
+        className={`${theme.digitalBg} backdrop-blur-md text-gray-800 rounded-2xl text-center border border-gray-200/50 shadow-lg mb-3 ${
+          deviceInfo.isMobile ? 'p-3' : 'p-6'
+        }`}
       >
         {isEditing ? (
           <input
@@ -611,103 +271,52 @@ export default function InteractiveClock() {
           />
         ) : (
           <div
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-light font-mono mb-2 tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors"
+            className={`font-light font-mono mb-2 tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors ${
+              deviceInfo.isMobile ? 'text-2xl' : 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
+            }`}
             onDoubleClick={handleEditStart}
             title="ダブルクリックで編集"
           >
-            {displayHour.toString().padStart(2, "0")}:{time.minutes.toString().padStart(2, "0")}
-            {showSecondHand && `:${time.seconds.toString().padStart(2, "0")}`}
+            {formatTime(displayHour, time.minutes, time.seconds, is24HourMode, showSecondHand)}
           </div>
         )}
         {!is24HourMode && (
-          <div className="text-xl sm:text-2xl md:text-3xl font-light opacity-70 tracking-wide">
-            {isAM ? "AM" : "PM"}
+          <div className={`font-light opacity-70 tracking-wide ${
+            deviceInfo.isMobile ? 'text-sm' : 'text-xl sm:text-2xl md:text-3xl'
+          }`}>
+            {isAMTime ? "AM" : "PM"}
           </div>
         )}
         {is24HourMode && (
-          <div className="text-sm sm:text-lg md:text-xl font-light opacity-70 tracking-wide">
+          <div className={`font-light opacity-70 tracking-wide ${
+            deviceInfo.isMobile ? 'text-xs' : 'text-sm sm:text-lg md:text-xl'
+          }`}>
             {t.twentyFourHourLabel}
           </div>
         )}
       </div>
 
-      {/* 操作説明 */}
-      <div className="text-center text-gray-700 mb-6 bg-white/60 backdrop-blur-md rounded-xl p-4 border border-gray-200/40 shadow-sm">
-        <p className="mb-2 flex items-center justify-center gap-2 text-base font-light">{t.hourHandInstruction}</p>
-        <p className="flex items-center justify-center gap-2 text-base font-light">{t.minuteHandInstruction}</p>
-      </div>
-
-      {/* ボタンエリア */}
-      <div className="flex gap-4 flex-wrap justify-center mb-6">
-        {/* 24時間/12時間表記切り替えボタン */}
-        <button
-          onClick={() => setIs24HourMode(!is24HourMode)}
-          className={`${theme.buttonBg} text-gray-700 font-light py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 text-base`}
-        >
-          {t.toggleTimeFormat} {is24HourMode ? t.twelveHourFormat : t.twentyFourHourFormat}
-        </button>
-
-        {/* 秒針表示/非表示切り替えボタン */}
-        <button
-          onClick={() => setShowSecondHand(!showSecondHand)}
-          className={`${theme.buttonBg} text-gray-700 font-light py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 text-base`}
-        >
-          {t.toggleSecondHand} {showSecondHand ? t.hideSecondHand : t.showSecondHand}
-        </button>
-
-        {/* 時計の動作オン/オフ切り替えボタン */}
-        <button
-          onClick={() => setIsClockRunning(!isClockRunning)}
-          className={`${theme.buttonBg} text-gray-700 font-light py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 text-base`}
-        >
-          {t.toggleClockMovement} {isClockRunning ? t.stopClock : t.startClock}
-        </button>
-
-        {/* リセットボタン */}
-        <button
-          onClick={() => {
-            const now = new Date()
-            setTime({
-              hours: now.getHours(),
-              minutes: now.getMinutes(),
-              seconds: now.getSeconds(),
-            })
-          }}
-          className={`${theme.buttonBg} text-gray-700 font-light py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 text-base`}
-        >
-          {t.resetButton}
-        </button>
-      </div>
-
-      {/* テーマ選択 */}
-      <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 border border-gray-200/40 shadow-sm">
-        <h3 className="text-center text-gray-700 font-light mb-3 text-base">🎨 テーマを選択</h3>
-        <div className="flex gap-3 justify-center flex-wrap">
-          {Object.entries(themes).map(([key, themeData]) => (
-            <button
-              key={key}
-              onClick={() => setCurrentTheme(key)}
-              className={`w-12 h-12 rounded-full border-4 transition-all duration-300 transform hover:scale-110 ${
-                currentTheme === key ? "border-gray-600 shadow-lg scale-105" : "border-gray-300 hover:border-gray-400"
-              }`}
-              style={{
-                background:
-                  key === "warm"
-                    ? "linear-gradient(135deg, #fbbf24, #f59e0b, #ef4444)"
-                    : key === "cool"
-                      ? "linear-gradient(135deg, #0ea5e9, #06b6d4, #10b981)"
-                      : key === "nature"
-                        ? "linear-gradient(135deg, #059669, #10b981, #84cc16)"
-                        : key === "elegant"
-                          ? "linear-gradient(135deg, #7c3aed, #8b5cf6, #6366f1)"
-                          : "linear-gradient(135deg, #ec4899, #f472b6, #fb7185)",
-              }}
-              title={themeData.name}
-              aria-label={`${themeData.name}テーマを選択`}
-            />
-          ))}
+      {/* 操作説明（モバイル以外） */}
+      {!deviceInfo.isMobile && (
+        <div className="text-center text-gray-700 mb-6 bg-white/60 backdrop-blur-md rounded-xl p-4 border border-gray-200/40 shadow-sm">
+          <p className="mb-2 flex items-center justify-center gap-2 text-base font-light">{t.hourHandInstruction}</p>
+          <p className="flex items-center justify-center gap-2 text-base font-light">{t.minuteHandInstruction}</p>
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* コントロールパネル */}
+      <MobileControlPanel
+        language={language}
+        is24HourMode={is24HourMode}
+        showSecondHand={showSecondHand}
+        isClockRunning={isClockRunning}
+        currentTheme={currentTheme}
+        onToggleTimeFormat={handleTimeFormatToggle}
+        onToggleSecondHand={() => setShowSecondHand(!showSecondHand)}
+        onToggleClockMovement={() => setIsClockRunning(!isClockRunning)}
+        onResetTime={resetToCurrentTime}
+        onThemeChange={setCurrentTheme}
+      />
+    </ResponsiveContainer>
   )
 }
