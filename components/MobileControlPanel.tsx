@@ -30,11 +30,11 @@ export default function MobileControlPanel({
     action()
   }
 
-  // モバイル向けボタンスタイル
-  const mobileButtonClass = deviceInfo.isMobile
+  // モバイル向けボタンスタイル（hydration問題を回避）
+  const mobileButtonClass = isClient && deviceInfo.isMobile
     ? "py-4 px-4 text-sm min-h-[44px] min-w-[44px]" // Apple HIG準拠の最小タッチターゲット
-    : deviceInfo.isTablet
-    ? "py-3 px-5 text-base min-h-[48px]" // Material Design準拠
+    : isClient && deviceInfo.isTablet
+    ? "py-4 px-6 text-lg min-h-[56px]" // タブレット向け大きめサイズ
     : "py-3 px-6 text-base"
 
   const baseButtonClass = `bg-white/70 hover:bg-white/90 text-gray-700 font-light rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${mobileButtonClass}`
@@ -44,44 +44,39 @@ export default function MobileControlPanel({
   
   if (isClient && (deviceInfo.isMobile || isSmallScreen)) {
     return (
-      <div className="w-full max-w-sm space-y-3">
-        {/* 主要コントロール */}
-        <div className="space-y-2">
+      <div className="w-full max-w-sm">
+        {/* 2列2行のグリッドレイアウト */}
+        <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => handleButtonClick(onToggleTimeFormat)}
-            className={`${baseButtonClass} w-full`}
+            className={`${baseButtonClass} text-xs`}
           >
-            <span className="text-sm">{t.toggleTimeFormat}</span>
-            <span className="text-xs opacity-80">
-              {is24HourMode ? t.twelveHourFormat : t.twentyFourHourFormat}
+            <span>
+              {is24HourMode ? "24-Hour → AM/PM" : "AM/PM → 24-Hour"}
             </span>
           </button>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => handleButtonClick(onToggleSecondHand)}
-              className={`${baseButtonClass} text-xs`}
-            >
-              <span>{showSecondHand ? t.hideSecondHand : t.showSecondHand}</span>
-            </button>
+          <button
+            onClick={() => handleButtonClick(onToggleSecondHand)}
+            className={`${baseButtonClass} text-xs`}
+          >
+            <span>Second Hand</span>
+          </button>
 
-            <button
-              onClick={() => handleButtonClick(onToggleClockMovement)}
-              className={`${baseButtonClass} text-xs`}
-            >
-              <span>{isClockRunning ? t.stopClock : t.startClock}</span>
-            </button>
-          </div>
+          <button
+            onClick={() => handleButtonClick(onToggleClockMovement)}
+            className={`${baseButtonClass} text-xs`}
+          >
+            <span>Stop Clock</span>
+          </button>
 
           <button
             onClick={() => handleButtonClick(onResetTime)}
-            className={`${baseButtonClass} w-full text-xs`}
+            className={`${baseButtonClass} text-xs`}
           >
             {t.resetButton}
           </button>
         </div>
-
-
       </div>
     )
   }
@@ -95,21 +90,21 @@ export default function MobileControlPanel({
           onClick={() => handleButtonClick(onToggleTimeFormat)}
           className={baseButtonClass}
         >
-          {t.toggleTimeFormat} {is24HourMode ? t.twelveHourFormat : t.twentyFourHourFormat}
+          {is24HourMode ? "24-Hour → AM/PM" : "AM/PM → 24-Hour"}
         </button>
 
         <button
           onClick={() => handleButtonClick(onToggleSecondHand)}
           className={baseButtonClass}
         >
-          {t.toggleSecondHand} {showSecondHand ? t.hideSecondHand : t.showSecondHand}
+          Second Hand
         </button>
 
         <button
           onClick={() => handleButtonClick(onToggleClockMovement)}
           className={baseButtonClass}
         >
-          {t.toggleClockMovement} {isClockRunning ? t.stopClock : t.startClock}
+          Stop Clock
         </button>
 
         <button

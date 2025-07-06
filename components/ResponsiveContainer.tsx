@@ -7,11 +7,16 @@ export interface ResponsiveContainerProps {
 }
 
 export default function ResponsiveContainer({ children, className = "" }: ResponsiveContainerProps) {
-  const { deviceInfo, isLandscape, viewportSize } = useMobileOptimization()
+  const { deviceInfo, isLandscape, viewportSize, isClient } = useMobileOptimization()
 
-  // デバイスタイプに応じたコンテナクラス
+  // デバイスタイプに応じたコンテナクラス（hydration問題を回避）
   const getContainerClasses = () => {
     const baseClasses = "flex flex-col items-center"
+    
+    // クライアントサイドの初期化が完了するまではデスクトップ向けを使用
+    if (!isClient) {
+      return `${baseClasses} justify-center min-h-screen p-4 sm:p-6 md:p-8 ${className}`
+    }
     
     // モバイル向けのコンテナ調整
     if (deviceInfo.isMobile) {
@@ -24,13 +29,10 @@ export default function ResponsiveContainer({ children, className = "" }: Respon
     
     // タブレット向け
     if (deviceInfo.isTablet) {
-      const landscapeClasses = isLandscape 
-        ? "flex-row justify-center gap-6 px-4 py-3" 
-        : "justify-center p-4"
-      return `${baseClasses} min-h-screen ${landscapeClasses} ${className}`
+      return `${baseClasses} min-h-screen justify-center p-4 ${className}`
     }
     
-    // デスクトップ向け
+    // デスクトップ向け - 常に縦向きレイアウト
     return `${baseClasses} justify-center min-h-screen p-4 sm:p-6 md:p-8 ${className}`
   }
 

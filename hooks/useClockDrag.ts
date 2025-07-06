@@ -21,6 +21,7 @@ export const useClockDrag = ({
   updateTimeWithMinuteRotation,
 }: UseClockDragProps) => {
   const handleMouseDown = useCallback((hand: "hour" | "minute") => {
+    console.log(`Drag started - setting isDragging to ${hand}`)
     setIsDragging(hand)
     setIsClockRunning(false)
   }, [setIsDragging, setIsClockRunning])
@@ -43,6 +44,7 @@ export const useClockDrag = ({
   )
 
   const handleMouseUp = useCallback(() => {
+    console.log('Drag ended - resetting isDragging to null')
     setIsDragging(null)
   }, [setIsDragging])
 

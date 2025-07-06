@@ -54,7 +54,7 @@ export default function InteractiveClock() {
   // 現在の翻訳を取得
   const t = getTranslations(language)
   const theme = themes[currentTheme]
-  const { deviceInfo, triggerHapticFeedback } = mobileOptimization
+  const { deviceInfo, triggerHapticFeedback, isClient } = mobileOptimization
 
   // ドラッグハンドラーの初期化
   const { handleMouseDown, handleMouseMove, handleMouseUp, handleTouchMove } = useClockDrag({
@@ -165,84 +165,109 @@ export default function InteractiveClock() {
 
   return (
     <ResponsiveContainer className={`bg-gradient-to-br ${theme.background} relative`}>
-      {/* 右上の固定位置要素 */}
-      <div className="absolute top-4 right-4 flex items-center gap-2 z-40">
-        {/* ヘルプボタン */}
-        <button
-          onClick={() => setIsHelpOpen(true)}
-          className="p-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors"
-          aria-label={t.help}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-            <path d="M12 17h.01"/>
-          </svg>
-        </button>
-        
-        {/* カスタムテーマドロップダウン */}
-        <div className="relative theme-dropdown">
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              console.log('Theme dropdown clicked, current state:', isThemeDropdownOpen)
-              setIsThemeDropdownOpen(!isThemeDropdownOpen)
-            }}
-            className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm px-3 py-2 text-sm hover:bg-white/90 transition-colors cursor-pointer"
-          >
-            <div
-              className="w-4 h-4 rounded-full border border-gray-300"
-              style={{
-                background: getThemeGradient(currentTheme),
-              }}
-            />
-            <svg
-              className={`w-4 h-4 transition-transform ${isThemeDropdownOpen ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+      {/* ヘッダー部分 */}
+      <div className="w-full mb-4 sm:mb-6 md:mb-8">
+        <div className="flex items-center justify-between w-full">
+          {/* 左側：ロゴとタイトル */}
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-800 flex items-center gap-3 tracking-wide">
+              🕐 {t.title}
+            </h1>
+          </div>
           
-          {isThemeDropdownOpen && (
-            <div className="absolute right-0 mt-1 bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg z-50 p-2">
-              <div className="flex flex-col gap-1">
-                {Object.entries(themes).map(([key, themeData]) => (
-                  <button
-                    key={key}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setCurrentTheme(key as ThemeKey)
-                      setIsThemeDropdownOpen(false)
-                    }}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100/50 transition-colors ${
-                      currentTheme === key ? 'bg-gray-100/50' : ''
-                    }`}
-                    title={themeData.name}
-                  >
-                    <div
-                      className={`w-4 h-4 rounded-full border-2 ${
-                        currentTheme === key ? 'border-gray-700' : 'border-gray-300'
-                      }`}
-                      style={{
-                        background: getThemeGradient(key as ThemeKey),
-                      }}
-                    />
-                  </button>
-                ))}
-              </div>
+          {/* 右側：ヘルプとテーマ選択 */}
+          <div className="flex items-center gap-2 z-40">
+            {/* ヘルプボタン */}
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              className={`bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors ${
+                isClient && deviceInfo.isTablet ? 'p-3' : 'p-2'
+              }`}
+              aria-label={t.help}
+            >
+              <svg 
+                width={isClient && deviceInfo.isTablet ? "24" : "20"} 
+                height={isClient && deviceInfo.isTablet ? "24" : "20"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <path d="M12 17h.01"/>
+              </svg>
+            </button>
+            
+            {/* カスタムテーマドロップダウン */}
+            <div className="relative theme-dropdown">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  console.log('Theme dropdown clicked, current state:', isThemeDropdownOpen)
+                  setIsThemeDropdownOpen(!isThemeDropdownOpen)
+                }}
+                className={`flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors cursor-pointer ${
+                  isClient && deviceInfo.isTablet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'
+                }`}
+              >
+                <div
+                  className={`rounded-full border border-gray-300 ${
+                    isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'
+                  }`}
+                  style={{
+                    background: getThemeGradient(currentTheme),
+                  }}
+                />
+                <svg
+                  className={`transition-transform ${isThemeDropdownOpen ? 'rotate-180' : ''} ${
+                    isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isThemeDropdownOpen && (
+                <div className="absolute right-0 mt-1 bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg z-50 p-2">
+                  <div className="flex flex-col gap-1">
+                    {Object.entries(themes).map(([key, themeData]) => (
+                      <button
+                        key={key}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setCurrentTheme(key as ThemeKey)
+                          setIsThemeDropdownOpen(false)
+                        }}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100/50 transition-colors ${
+                          currentTheme === key ? 'bg-gray-100/50' : ''
+                        }`}
+                        title={themeData.name}
+                      >
+                        <div
+                          className={`rounded-full border-2 ${
+                            currentTheme === key ? 'border-gray-700' : 'border-gray-300'
+                          } ${
+                            isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'
+                          }`}
+                          style={{
+                            background: getThemeGradient(key as ThemeKey),
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
-
-      <div className="mb-4 sm:mb-6 md:mb-8 text-left self-start w-full">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-800 mb-2 flex items-center gap-3 tracking-wide text-left">
-          🕐 {t.title}
-        </h1>
-        <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+        
+        {/* 装飾ライン */}
+        <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent mt-2"></div>
       </div>
 
       {/* アナログ時計 */}
@@ -256,7 +281,8 @@ export default function InteractiveClock() {
         onTouchMove={(e) => handleTouchMove(e, clockRef)}
         onTouchStart={(e) => isDragging && e.preventDefault()}
         onTouchEnd={handleMouseUp}
-        isDragging={isDragging !== null}
+        onTouchCancel={handleMouseUp}
+        isDragging={isDragging}
         onThemeChange={handleThemeChange}
         onTimeFormatToggle={handleTimeFormatToggle}
         currentTheme={currentTheme}
@@ -320,24 +346,47 @@ export default function InteractiveClock() {
           })}
 
           {/* 分針 */}
-          <line
-            x1={CLOCK_DIMENSIONS.CENTER.x}
-            y1={CLOCK_DIMENSIONS.CENTER.y}
-            x2={Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.cos((minuteAngle * Math.PI) / 180)).toFixed(4))}
-            y2={Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.sin((minuteAngle * Math.PI) / 180)).toFixed(4))}
-            stroke={theme.minuteHand}
-            strokeWidth="5"
-            strokeLinecap="round"
-            className={cn(
-              "cursor-pointer transition-all duration-150 drop-shadow-sm",
-              isDragging === "minute" ? "stroke-blue-600" : "hover:stroke-blue-600",
+          <g>
+            {/* 分針の透明なタッチ領域（モバイル用） */}
+            {isClient && deviceInfo.isMobile && (
+              <line
+                x1={CLOCK_DIMENSIONS.CENTER.x}
+                y1={CLOCK_DIMENSIONS.CENTER.y}
+                x2={Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.cos((minuteAngle * Math.PI) / 180)).toFixed(4))}
+                y2={Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.sin((minuteAngle * Math.PI) / 180)).toFixed(4))}
+                stroke="transparent"
+                strokeWidth="20"
+                strokeLinecap="round"
+                className="cursor-pointer"
+                onMouseDown={() => handleMouseDown("minute")}
+                onTouchStart={(e) => {
+                  e.preventDefault()
+                  triggerHapticFeedback('medium')
+                  handleMouseDown("minute")
+                }}
+              />
             )}
-            onMouseDown={() => handleMouseDown("minute")}
-            onTouchStart={(e) => {
-              e.preventDefault()
-              handleMouseDown("minute")
-            }}
-          />
+            {/* 分針の見た目 */}
+            <line
+              x1={CLOCK_DIMENSIONS.CENTER.x}
+              y1={CLOCK_DIMENSIONS.CENTER.y}
+              x2={Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.cos((minuteAngle * Math.PI) / 180)).toFixed(4))}
+              y2={Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.sin((minuteAngle * Math.PI) / 180)).toFixed(4))}
+              stroke={theme.minuteHand}
+              strokeWidth={isClient && deviceInfo.isMobile ? "7" : "5"}
+              strokeLinecap="round"
+              className={cn(
+                "cursor-pointer transition-all duration-150 drop-shadow-sm",
+                isDragging === "minute" ? "stroke-blue-600" : "hover:stroke-blue-600",
+              )}
+              onMouseDown={() => handleMouseDown("minute")}
+              onTouchStart={(e) => {
+                e.preventDefault()
+                triggerHapticFeedback('medium')
+                handleMouseDown("minute")
+              }}
+            />
+          </g>
 
           {/* 秒針 - showSecondHandがtrueの場合のみ表示 */}
           {showSecondHand && (
@@ -355,39 +404,87 @@ export default function InteractiveClock() {
           )}
 
           {/* 時針 */}
-          <line
-            x1={CLOCK_DIMENSIONS.CENTER.x}
-            y1={CLOCK_DIMENSIONS.CENTER.y}
-            x2={Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.cos((hourAngle * Math.PI) / 180)).toFixed(4))}
-            y2={Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.sin((hourAngle * Math.PI) / 180)).toFixed(4))}
-            stroke={theme.hourHand}
-            strokeWidth="7"
-            strokeLinecap="round"
-            className={cn(
-              "cursor-pointer transition-all duration-150 drop-shadow-sm",
-              isDragging === "hour" ? "stroke-red-600" : "hover:stroke-red-600",
+          <g>
+            {/* 時針の透明なタッチ領域（モバイル用） */}
+            {isClient && deviceInfo.isMobile && (
+              <line
+                x1={CLOCK_DIMENSIONS.CENTER.x}
+                y1={CLOCK_DIMENSIONS.CENTER.y}
+                x2={Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.cos((hourAngle * Math.PI) / 180)).toFixed(4))}
+                y2={Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.sin((hourAngle * Math.PI) / 180)).toFixed(4))}
+                stroke="transparent"
+                strokeWidth="22"
+                strokeLinecap="round"
+                className="cursor-pointer"
+                onMouseDown={() => handleMouseDown("hour")}
+                onTouchStart={(e) => {
+                  e.preventDefault()
+                  triggerHapticFeedback('medium')
+                  handleMouseDown("hour")
+                }}
+              />
             )}
-            onMouseDown={() => handleMouseDown("hour")}
-            onTouchStart={(e) => {
-              e.preventDefault()
-              handleMouseDown("hour")
-            }}
-          />
+            {/* 時針の見た目 */}
+            <line
+              x1={CLOCK_DIMENSIONS.CENTER.x}
+              y1={CLOCK_DIMENSIONS.CENTER.y}
+              x2={Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.cos((hourAngle * Math.PI) / 180)).toFixed(4))}
+              y2={Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.sin((hourAngle * Math.PI) / 180)).toFixed(4))}
+              stroke={theme.hourHand}
+              strokeWidth={isClient && deviceInfo.isMobile ? "9" : "7"}
+              strokeLinecap="round"
+              className={cn(
+                "cursor-pointer transition-all duration-150 drop-shadow-sm",
+                isDragging === "hour" ? "stroke-red-600" : "hover:stroke-red-600",
+              )}
+              onMouseDown={() => handleMouseDown("hour")}
+              onTouchStart={(e) => {
+                e.preventDefault()
+                triggerHapticFeedback('medium')
+                handleMouseDown("hour")
+              }}
+            />
+          </g>
 
           {/* 中心の円 */}
-          <circle
-            cx={CLOCK_DIMENSIONS.CENTER.x}
-            cy={CLOCK_DIMENSIONS.CENTER.y}
-            r={CLOCK_DIMENSIONS.CENTER_DOT_RADIUS}
-            fill="#374151"
-            className="drop-shadow-sm"
-          />
+          <g>
+            {/* 中心の円の透明なタッチ領域（モバイル用） */}
+            {isClient && deviceInfo.isMobile && (
+              <circle
+                cx={CLOCK_DIMENSIONS.CENTER.x}
+                cy={CLOCK_DIMENSIONS.CENTER.y}
+                r={25}
+                fill="transparent"
+                className="cursor-pointer"
+                onDoubleClick={resetToCurrentTime}
+                onTouchStart={(e) => {
+                  e.preventDefault()
+                  triggerHapticFeedback('medium')
+                }}
+              />
+            )}
+            {/* 中心の円の見た目 */}
+            <circle
+              cx={CLOCK_DIMENSIONS.CENTER.x}
+              cy={CLOCK_DIMENSIONS.CENTER.y}
+              r={isClient && deviceInfo.isMobile ? CLOCK_DIMENSIONS.CENTER_DOT_RADIUS + 2 : CLOCK_DIMENSIONS.CENTER_DOT_RADIUS}
+              fill="#374151"
+              className="drop-shadow-sm cursor-pointer"
+              onDoubleClick={resetToCurrentTime}
+              onTouchStart={(e) => {
+                if (isClient && deviceInfo.isMobile) {
+                  e.preventDefault()
+                  triggerHapticFeedback('medium')
+                }
+              }}
+            />
+          </g>
       </MobileOptimizedClock>
 
       {/* デジタル表示 */}
       <div
         className={`${theme.digitalBg} backdrop-blur-md text-gray-800 rounded-2xl text-center border border-gray-200/50 shadow-lg mb-3 ${
-          deviceInfo.isMobile ? 'p-3' : 'p-6'
+          isClient && deviceInfo.isMobile ? 'p-3' : 'p-6'
         }`}
       >
         {isEditing ? (
@@ -397,7 +494,10 @@ export default function InteractiveClock() {
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleEditKeyDown}
             onBlur={handleEditComplete}
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-light font-mono mb-2 tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500"
+            className={`font-light font-mono mb-2 tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500 ${
+              isClient && deviceInfo.isTablet ? 'text-4xl sm:text-5xl' : 
+              'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
+            }`}
             placeholder={showSecondHand ? "HH:MM:SS" : "HH:MM"}
             autoFocus
           />
@@ -405,18 +505,22 @@ export default function InteractiveClock() {
           <div className="flex items-center justify-center gap-2 mb-2">
             <div
               className={`font-light font-mono tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors select-none ${
-                deviceInfo.isMobile ? 'text-2xl' : 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
+                isClient && deviceInfo.isMobile ? 'text-2xl' : 
+                isClient && deviceInfo.isTablet ? 'text-4xl sm:text-5xl' : 
+                'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
               }`}
               onDoubleClick={handleEditStart}
-              onClick={deviceInfo.isMobile ? handleDigitalClockTap : undefined}
-              onTouchStart={deviceInfo.isMobile ? (e) => e.preventDefault() : undefined}
-              title={deviceInfo.isMobile ? "ダブルタップで編集" : "ダブルクリックで編集"}
+              onClick={isClient && deviceInfo.isMobile ? handleDigitalClockTap : undefined}
+              onTouchStart={isClient && deviceInfo.isMobile ? (e) => e.preventDefault() : undefined}
+              title={isClient && deviceInfo.isMobile ? "ダブルタップで編集" : "ダブルクリックで編集"}
             >
               {formatTime(displayHour, time.minutes, time.seconds, is24HourMode, showSecondHand)}
             </div>
             {!is24HourMode && (
               <div className={`font-light opacity-70 tracking-wide ${
-                deviceInfo.isMobile ? 'text-sm' : 'text-xl sm:text-2xl md:text-3xl'
+                isClient && deviceInfo.isMobile ? 'text-sm' : 
+                isClient && deviceInfo.isTablet ? 'text-lg sm:text-xl' : 
+                'text-xl sm:text-2xl md:text-3xl'
               }`}>
                 {isAMTime ? "AM" : "PM"}
               </div>
@@ -425,13 +529,7 @@ export default function InteractiveClock() {
         )}
       </div>
 
-      {/* 操作説明（モバイル以外） */}
-      {!deviceInfo.isMobile && (
-        <div className="text-center text-gray-700 mb-6 bg-white/60 backdrop-blur-md rounded-xl p-4 border border-gray-200/40 shadow-sm">
-          <p className="mb-2 flex items-center justify-center gap-2 text-base font-light">{t.hourHandInstruction}</p>
-          <p className="flex items-center justify-center gap-2 text-base font-light">{t.minuteHandInstruction}</p>
-        </div>
-      )}
+
 
       {/* コントロールパネル */}
       <MobileControlPanel
