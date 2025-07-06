@@ -124,7 +124,7 @@ export default function InteractiveClock() {
         onTouchMove={(e) => handleTouchMove(e, clockRef)}
         onTouchStart={(e) => isDragging && e.preventDefault()}
         onTouchEnd={handleMouseUp}
-        isDragging={isDragging}
+        isDragging={isDragging !== null}
         onThemeChange={handleThemeChange}
         onTimeFormatToggle={handleTimeFormatToggle}
         currentTheme={currentTheme}
@@ -146,8 +146,8 @@ export default function InteractiveClock() {
           {Array.from({ length: 12 }, (_, i) => {
             const number = i === 0 ? 12 : i
             const angle = i * 30 - 90
-            const x = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.NUMBER_RADIUS * Math.cos((angle * Math.PI) / 180)
-            const y = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.NUMBER_RADIUS * Math.sin((angle * Math.PI) / 180)
+            const x = Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.NUMBER_RADIUS * Math.cos((angle * Math.PI) / 180)).toFixed(4))
+            const y = Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.NUMBER_RADIUS * Math.sin((angle * Math.PI) / 180)).toFixed(4))
 
             return (
               <text
@@ -166,10 +166,10 @@ export default function InteractiveClock() {
           {/* 時間の目盛り */}
           {Array.from({ length: 12 }, (_, i) => {
             const angle = i * 30
-            const x1 = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_MARK_OUTER * Math.cos(((angle - 90) * Math.PI) / 180)
-            const y1 = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_MARK_OUTER * Math.sin(((angle - 90) * Math.PI) / 180)
-            const x2 = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_MARK_INNER * Math.cos(((angle - 90) * Math.PI) / 180)
-            const y2 = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_MARK_INNER * Math.sin(((angle - 90) * Math.PI) / 180)
+            const x1 = Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_MARK_OUTER * Math.cos(((angle - 90) * Math.PI) / 180)).toFixed(4))
+            const y1 = Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_MARK_OUTER * Math.sin(((angle - 90) * Math.PI) / 180)).toFixed(4))
+            const x2 = Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_MARK_INNER * Math.cos(((angle - 90) * Math.PI) / 180)).toFixed(4))
+            const y2 = Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_MARK_INNER * Math.sin(((angle - 90) * Math.PI) / 180)).toFixed(4))
 
             return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#cbd5e1" strokeWidth="2" />
           })}
@@ -179,10 +179,10 @@ export default function InteractiveClock() {
             if (i % 5 === 0) return null
 
             const angle = i * 6
-            const x1 = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_MARK_OUTER * Math.cos(((angle - 90) * Math.PI) / 180)
-            const y1 = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_MARK_OUTER * Math.sin(((angle - 90) * Math.PI) / 180)
-            const x2 = CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_MARK_INNER * Math.cos(((angle - 90) * Math.PI) / 180)
-            const y2 = CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_MARK_INNER * Math.sin(((angle - 90) * Math.PI) / 180)
+            const x1 = Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_MARK_OUTER * Math.cos(((angle - 90) * Math.PI) / 180)).toFixed(4))
+            const y1 = Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_MARK_OUTER * Math.sin(((angle - 90) * Math.PI) / 180)).toFixed(4))
+            const x2 = Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_MARK_INNER * Math.cos(((angle - 90) * Math.PI) / 180)).toFixed(4))
+            const y2 = Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_MARK_INNER * Math.sin(((angle - 90) * Math.PI) / 180)).toFixed(4))
 
             return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#e2e8f0" strokeWidth="1" />
           })}
@@ -191,8 +191,8 @@ export default function InteractiveClock() {
           <line
             x1={CLOCK_DIMENSIONS.CENTER.x}
             y1={CLOCK_DIMENSIONS.CENTER.y}
-            x2={CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.cos((minuteAngle * Math.PI) / 180)}
-            y2={CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.sin((minuteAngle * Math.PI) / 180)}
+            x2={Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.cos((minuteAngle * Math.PI) / 180)).toFixed(4))}
+            y2={Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.MINUTE_HAND_LENGTH * Math.sin((minuteAngle * Math.PI) / 180)).toFixed(4))}
             stroke={theme.minuteHand}
             strokeWidth="5"
             strokeLinecap="round"
@@ -212,8 +212,8 @@ export default function InteractiveClock() {
             <line
               x1={CLOCK_DIMENSIONS.CENTER.x}
               y1={CLOCK_DIMENSIONS.CENTER.y}
-              x2={CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.SECOND_HAND_LENGTH * Math.cos((secondAngle * Math.PI) / 180)}
-              y2={CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.SECOND_HAND_LENGTH * Math.sin((secondAngle * Math.PI) / 180)}
+              x2={Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.SECOND_HAND_LENGTH * Math.cos((secondAngle * Math.PI) / 180)).toFixed(4))}
+              y2={Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.SECOND_HAND_LENGTH * Math.sin((secondAngle * Math.PI) / 180)).toFixed(4))}
               stroke={theme.secondHand}
               strokeWidth="2"
               strokeLinecap="round"
@@ -226,8 +226,8 @@ export default function InteractiveClock() {
           <line
             x1={CLOCK_DIMENSIONS.CENTER.x}
             y1={CLOCK_DIMENSIONS.CENTER.y}
-            x2={CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.cos((hourAngle * Math.PI) / 180)}
-            y2={CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.sin((hourAngle * Math.PI) / 180)}
+            x2={Number((CLOCK_DIMENSIONS.CENTER.x + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.cos((hourAngle * Math.PI) / 180)).toFixed(4))}
+            y2={Number((CLOCK_DIMENSIONS.CENTER.y + CLOCK_DIMENSIONS.HOUR_HAND_LENGTH * Math.sin((hourAngle * Math.PI) / 180)).toFixed(4))}
             stroke={theme.hourHand}
             strokeWidth="7"
             strokeLinecap="round"

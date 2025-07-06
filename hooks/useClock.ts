@@ -32,7 +32,8 @@ export interface UseClockActions {
 }
 
 export const useClock = (): UseClockState & UseClockActions => {
-  const [time, setTime] = useState<Time>({ hours: 0, minutes: 0, seconds: 0 })
+  // 固定の初期時刻を使用してhydrationエラーを回避
+  const [time, setTime] = useState<Time>({ hours: 12, minutes: 0, seconds: 0 })
   const [isDragging, setIsDragging] = useState<"hour" | "minute" | null>(null)
   const [is24HourMode, setIs24HourMode] = useState<boolean>(false)
   const [language, setLanguage] = useState<Language>("en")
@@ -41,20 +42,28 @@ export const useClock = (): UseClockState & UseClockActions => {
   const [isClockRunning, setIsClockRunning] = useState<boolean>(true)
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const [editValue, setEditValue] = useState<string>("")
+  const [isHydrated, setIsHydrated] = useState<boolean>(false)
   
-  const prevMinuteRef = useRef<number>(10)
+  const prevMinuteRef = useRef<number>(0)
   const prevHourAngleRef = useRef<number>(0)
 
-  // 初期化
+  // クライアントサイドでのハイドレーション完了を検出
   useEffect(() => {
-    const currentTime = getCurrentTime()
-    setTime(currentTime)
-    setLanguage(detectLanguage())
+    setIsHydrated(true)
   }, [])
+
+  // ハイドレーション完了後に現在時刻で初期化
+  useEffect(() => {
+    if (isHydrated) {
+      const currentTime = getCurrentTime()
+      setTime(currentTime)
+      setLanguage(detectLanguage())
+    }
+  }, [isHydrated])
 
   // リアルタイム時計の更新
   useEffect(() => {
-    if (isDragging || !isClockRunning || isEditing) return
+    if (!isHydrated || isDragging || !isClockRunning || isEditing) return
 
     const interval = setInterval(() => {
       const currentTime = getCurrentTime()
@@ -62,7 +71,7 @@ export const useClock = (): UseClockState & UseClockActions => {
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [isDragging, isClockRunning, isEditing])
+  }, [isHydrated, isDragging, isClockRunning, isEditing])
 
   // timeが外部から変更された時にrefを同期
   useEffect(() => {

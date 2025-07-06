@@ -6,7 +6,7 @@ import { CLOCK_DIMENSIONS } from '../lib/constants'
 import { type ThemeKey } from '../lib/themes'
 
 export interface MobileOptimizedClockProps {
-  clockRef: React.RefObject<SVGSVGElement>
+  clockRef: React.RefObject<SVGSVGElement | null>
   width: number
   height: number
   children: React.ReactNode
@@ -97,13 +97,7 @@ export default function MobileOptimizedClock({
       className="relative mb-4 sm:mb-6 md:mb-8"
       style={touchEnhancementStyle}
     >
-      {/* スワイプヒント（モバイルのみ） */}
-      {deviceInfo.isMobile && (
-        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 text-center">
-          <div>👆 上: 時間形式切替</div>
-          <div>👈👉 左右: テーマ変更</div>
-        </div>
-      )}
+
 
       <svg
         ref={clockRef}

@@ -27,9 +27,13 @@ export default function MobileControlPanel({
   onResetTime,
   onThemeChange,
 }: MobileControlPanelProps) {
-  const { deviceInfo, triggerHapticFeedback } = useMobileOptimization()
+  const { deviceInfo, triggerHapticFeedback, isClient } = useMobileOptimization()
   const t = getTranslations(language)
   const theme = themes[currentTheme]
+
+  if (!isClient) {
+    return null;
+  }
 
   const handleButtonClick = (action: () => void) => {
     triggerHapticFeedback('light')
@@ -68,16 +72,23 @@ export default function MobileControlPanel({
               onClick={() => handleButtonClick(onToggleSecondHand)}
               className={`${baseButtonClass} text-xs`}
             >
-              <span>{t.toggleSecondHand}</span>
+              <span>{showSecondHand ? t.hideSecondHand : t.showSecondHand}</span>
             </button>
 
             <button
-              onClick={() => handleButtonClick(onResetTime)}
+              onClick={() => handleButtonClick(onToggleClockMovement)}
               className={`${baseButtonClass} text-xs`}
             >
-              {t.resetButton}
+              <span>{isClockRunning ? t.stopClock : t.startClock}</span>
             </button>
           </div>
+
+          <button
+            onClick={() => handleButtonClick(onResetTime)}
+            className={`${baseButtonClass} w-full text-xs`}
+          >
+            {t.resetButton}
+          </button>
         </div>
 
         {/* テーマ選択（簡素化） */}

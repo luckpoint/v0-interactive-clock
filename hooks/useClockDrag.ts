@@ -26,7 +26,7 @@ export const useClockDrag = ({
   }, [setIsDragging, setIsClockRunning])
 
   const handleMouseMove = useCallback(
-    (e: React.MouseEvent, clockRef: React.RefObject<SVGSVGElement>) => {
+    (e: React.MouseEvent, clockRef: React.RefObject<SVGSVGElement | null>) => {
       if (!isDragging || !clockRef.current) return
 
       const angle = getAngleFromPosition(e.clientX, e.clientY, clockRef.current)
@@ -47,7 +47,7 @@ export const useClockDrag = ({
   }, [setIsDragging])
 
   const handleTouchMove = useCallback(
-    (e: React.TouchEvent, clockRef: React.RefObject<SVGSVGElement>) => {
+    (e: React.TouchEvent, clockRef: React.RefObject<SVGSVGElement | null>) => {
       if (!isDragging || e.touches.length === 0 || !clockRef.current) return
 
       e.preventDefault()

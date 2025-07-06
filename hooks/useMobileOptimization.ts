@@ -22,13 +22,25 @@ export interface MobileOptimizationActions {
   updateViewportSize: () => void
 }
 
-export const useMobileOptimization = (): MobileOptimizationState & MobileOptimizationActions => {
-  const [deviceInfo, setDeviceInfo] = useState<MobileDetection>(() => detectMobileDevice())
+const initialDeviceInfo: MobileDetection = {
+  isMobile: false,
+  isTablet: false,
+  isDesktop: true,
+  hasTouch: false,
+  platform: 'unknown',
+};
+
+export const useMobileOptimization = (): MobileOptimizationState & MobileOptimizationActions & { isClient: boolean } => {
+  const [isClient, setIsClient] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState<MobileDetection>(initialDeviceInfo)
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 })
   const [isLandscape, setIsLandscape] = useState(false)
 
   // 初期化とリサイズ処理
   useEffect(() => {
+    setIsClient(true);
+    setDeviceInfo(detectMobileDevice())
+    
     const updateViewport = () => {
       if (typeof window !== 'undefined') {
         const width = window.innerWidth
@@ -82,6 +94,7 @@ export const useMobileOptimization = (): MobileOptimizationState & MobileOptimiz
     touchAreaExpansion,
     isLandscape,
     viewportSize,
+    isClient,
     triggerHapticFeedback,
     updateViewportSize,
   }
