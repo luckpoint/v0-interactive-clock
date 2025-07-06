@@ -36,7 +36,7 @@ Visit the live demo at: [https://luckpoint.github.io/v0-interactive-clock/](http
 ### Prerequisites
 
 - Node.js (v18 or higher)
-- npm
+- pnpm
 
 ### Installation
 
@@ -46,20 +46,17 @@ git clone https://github.com/luckpoint/v0-interactive-clock.git
 cd v0-interactive-clock
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm run dev
+pnpm run dev
 ```
 
 ### Building for Production
 
 ```bash
 # Build the project
-npm run build
-
-# Deploy to GitHub Pages
-npm run deploy
+pnpm run build
 ```
 
 ## 🌐 Deploy to GitHub Pages
@@ -110,7 +107,8 @@ v0-interactive-clock/
 │   ├── interactive-clock.tsx      # Main clock component
 │   ├── MobileOptimizedClock.tsx   # Mobile-optimized clock wrapper
 │   ├── MobileControlPanel.tsx     # Mobile-specific controls
-│   └── ResponsiveContainer.tsx    # Responsive layout container
+│   ├── ResponsiveContainer.tsx    # Responsive layout container
+│   └── theme-provider.tsx         # Theme provider for Next-Themes
 ├── hooks/               # Custom React hooks
 │   ├── useClock.ts              # Clock state management
 │   ├── useClockDrag.ts          # Drag interaction handling
@@ -123,9 +121,14 @@ v0-interactive-clock/
 │   ├── clock-utils.ts         # Clock calculation utilities
 │   ├── mobile-utils.ts        # Mobile detection utilities
 │   ├── constants.ts           # App constants
-│   └── types.ts               # TypeScript type definitions
+│   ├── types.ts               # TypeScript type definitions
+│   └── utils.ts               # General utility functions
 └── docs/                # Documentation
-    └── improvement.md          # Development improvement notes
+    ├── digital-clock-edit-mode.md
+    ├── improvement.md
+    ├── prevent-scroll-on-mobile.md
+    ├── responsive-design.md
+    └── theme.md
 ```
 
 ## 🧪 Technology Stack
@@ -135,12 +138,17 @@ v0-interactive-clock/
 - **Styling**: Tailwind CSS 3.4+
 - **UI Components**: Custom components with Radix UI primitives
 - **Icons**: Lucide React
+- **State Management**: React Hooks
+- **Theming**: next-themes
+- **Package Manager**: pnpm
 - **Build Tool**: Next.js built-in bundler
 - **Deployment**: GitHub Pages with GitHub Actions
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+This project uses `pnpm` for package management. Please use `pnpm` to install dependencies.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
