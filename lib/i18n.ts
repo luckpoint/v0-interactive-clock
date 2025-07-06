@@ -13,6 +13,8 @@ export interface Translations {
   toggleClockMovement: string
   startClock: string
   stopClock: string
+  selectTheme: string
+  selectThemeLabel: string
 }
 
 export type Language = 'en' | 'ja'
@@ -33,6 +35,8 @@ export const translations: Record<Language, Translations> = {
     toggleClockMovement: "⚙️",
     startClock: "Start Clock",
     stopClock: "Stop Clock",
+    selectTheme: "🎨 Select Theme",
+    selectThemeLabel: "Select {themeName} theme",
   },
   ja: {
     title: "インタラクティブ時計",
@@ -49,6 +53,8 @@ export const translations: Record<Language, Translations> = {
     toggleClockMovement: "⚙️",
     startClock: "時計を動かす",
     stopClock: "時計を止める",
+    selectTheme: "🎨 テーマを選択",
+    selectThemeLabel: "{themeName}のテーマを選択",
   },
 }
 

@@ -82,7 +82,7 @@ export default function MobileControlPanel({
 
         {/* テーマ選択（簡素化） */}
         <div className="bg-white/70 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50 shadow-sm">
-          <h3 className="text-center text-gray-700 font-light mb-2 text-xs">🎨 テーマ</h3>
+          <h3 className="text-center text-gray-700 font-light mb-2 text-xs">{t.selectTheme}</h3>
           <div className="flex gap-2 justify-center">
             {Object.entries(themes).map(([key, themeData]) => (
               <button
@@ -104,7 +104,7 @@ export default function MobileControlPanel({
                       : "linear-gradient(135deg, #ec4899, #f472b6, #fb7185)",
                 }}
                 title={themeData.name}
-                aria-label={`${themeData.name}テーマを選択`}
+                aria-label={t.selectThemeLabel.replace('{themeName}', themeData.name)}
               />
             ))}
           </div>
@@ -149,7 +149,7 @@ export default function MobileControlPanel({
 
       {/* テーマ選択 */}
       <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 border border-gray-200/40 shadow-sm">
-        <h3 className="text-center text-gray-700 font-light mb-3 text-base">🎨 テーマを選択</h3>
+        <h3 className="text-center text-gray-700 font-light mb-3 text-base">{t.selectTheme}</h3>
         <div className="flex gap-3 justify-center flex-wrap">
           {Object.entries(themes).map(([key, themeData]) => (
             <button
