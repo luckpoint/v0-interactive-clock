@@ -31,9 +31,7 @@ export default function MobileControlPanel({
   const t = getTranslations(language)
   const theme = themes[currentTheme]
 
-  if (!isClient) {
-    return null;
-  }
+  
 
   const handleButtonClick = (action: () => void) => {
     triggerHapticFeedback('light')
