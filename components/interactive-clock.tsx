@@ -1,7 +1,7 @@
 "use client"
 
 import type * as React from "react"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { cn } from "../lib/utils"
 import { themes, getThemeGradient, type ThemeKey } from "../lib/themes"
 import { getTranslations } from "../lib/i18n"
@@ -14,9 +14,16 @@ import { useMobileOptimization } from "../hooks/useMobileOptimization"
 import ResponsiveContainer from "./ResponsiveContainer"
 import MobileOptimizedClock from "./MobileOptimizedClock"
 import MobileControlPanel from "./MobileControlPanel"
+import HelpOverlay from "./HelpOverlay"
 
 export default function InteractiveClock() {
   const clockRef = useRef<SVGSVGElement>(null)
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false)
+  
+  // ダブルタップ検出のための状態
+  const [lastTapTime, setLastTapTime] = useState<number>(0)
+  const [tapCount, setTapCount] = useState<number>(0)
   
   const clockState = useClock()
   const mobileOptimization = useMobileOptimization()
@@ -73,6 +80,30 @@ export default function InteractiveClock() {
     setIsClockRunning,
   })
 
+  // カスタムダブルタップ検出ハンドラー
+  const handleDigitalClockTap = () => {
+    const currentTime = Date.now()
+    const timeSinceLastTap = currentTime - lastTapTime
+    
+    if (timeSinceLastTap < 300 && tapCount === 1) {
+      // ダブルタップが検出された
+      setTapCount(0)
+      setLastTapTime(0)
+      handleEditStart()
+      triggerHapticFeedback('medium')
+    } else {
+      // 最初のタップ
+      setTapCount(1)
+      setLastTapTime(currentTime)
+      
+      // 300ms後にタップカウントをリセット
+      setTimeout(() => {
+        setTapCount(0)
+        setLastTapTime(0)
+      }, 300)
+    }
+  }
+
   // テーマ変更ハンドラー（スワイプ対応）
   const handleThemeChange = (direction: 'next' | 'prev') => {
     const themeKeys = Object.keys(themes) as ThemeKey[]
@@ -104,13 +135,114 @@ export default function InteractiveClock() {
   const isAMTime = isAM(time.hours)
   const displayHour = getDisplayHour(time.hours, is24HourMode)
 
+  // 外部クリックでドロップダウンを閉じる
+  useEffect(() => {
+    if (!isThemeDropdownOpen) return
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (!target.closest('.theme-dropdown')) {
+        console.log('Outside click detected, closing dropdown')
+        setIsThemeDropdownOpen(false)
+      }
+    }
+
+    // 少し遅延を設けて、ボタンクリックと外部クリックの競合を防ぐ
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('click', handleOutsideClick)
+    }, 100)
+
+    return () => {
+      clearTimeout(timeoutId)
+      document.removeEventListener('click', handleOutsideClick)
+    }
+  }, [isThemeDropdownOpen])
+
+  // デバッグ用：状態の変化を追跡
+  useEffect(() => {
+    console.log('isThemeDropdownOpen changed:', isThemeDropdownOpen)
+  }, [isThemeDropdownOpen])
+
   return (
-    <ResponsiveContainer className={`bg-gradient-to-br ${theme.background}`}>
-      <div className="text-center mb-4 sm:mb-6 md:mb-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-800 mb-2 flex items-center justify-center gap-3 tracking-wide">
+    <ResponsiveContainer className={`bg-gradient-to-br ${theme.background} relative`}>
+      {/* 右上の固定位置要素 */}
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-40">
+        {/* ヘルプボタン */}
+        <button
+          onClick={() => setIsHelpOpen(true)}
+          className="p-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors"
+          aria-label={t.help}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <path d="M12 17h.01"/>
+          </svg>
+        </button>
+        
+        {/* カスタムテーマドロップダウン */}
+        <div className="relative theme-dropdown">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              console.log('Theme dropdown clicked, current state:', isThemeDropdownOpen)
+              setIsThemeDropdownOpen(!isThemeDropdownOpen)
+            }}
+            className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm px-3 py-2 text-sm hover:bg-white/90 transition-colors cursor-pointer"
+          >
+            <div
+              className="w-4 h-4 rounded-full border border-gray-300"
+              style={{
+                background: getThemeGradient(currentTheme),
+              }}
+            />
+            <svg
+              className={`w-4 h-4 transition-transform ${isThemeDropdownOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {isThemeDropdownOpen && (
+            <div className="absolute right-0 mt-1 bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg z-50 p-2">
+              <div className="flex flex-col gap-1">
+                {Object.entries(themes).map(([key, themeData]) => (
+                  <button
+                    key={key}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setCurrentTheme(key as ThemeKey)
+                      setIsThemeDropdownOpen(false)
+                    }}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100/50 transition-colors ${
+                      currentTheme === key ? 'bg-gray-100/50' : ''
+                    }`}
+                    title={themeData.name}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 ${
+                        currentTheme === key ? 'border-gray-700' : 'border-gray-300'
+                      }`}
+                      style={{
+                        background: getThemeGradient(key as ThemeKey),
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mb-4 sm:mb-6 md:mb-8 text-left self-start w-full">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-800 mb-2 flex items-center gap-3 tracking-wide text-left">
           🕐 {t.title}
         </h1>
-        <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
+        <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
       </div>
 
       {/* アナログ時計 */}
@@ -272,11 +404,13 @@ export default function InteractiveClock() {
         ) : (
           <div className="flex items-center justify-center gap-2 mb-2">
             <div
-              className={`font-light font-mono tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors ${
+              className={`font-light font-mono tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors select-none ${
                 deviceInfo.isMobile ? 'text-2xl' : 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
               }`}
               onDoubleClick={handleEditStart}
-              title="ダブルクリックで編集"
+              onClick={deviceInfo.isMobile ? handleDigitalClockTap : undefined}
+              onTouchStart={deviceInfo.isMobile ? (e) => e.preventDefault() : undefined}
+              title={deviceInfo.isMobile ? "ダブルタップで編集" : "ダブルクリックで編集"}
             >
               {formatTime(displayHour, time.minutes, time.seconds, is24HourMode, showSecondHand)}
             </div>
@@ -305,12 +439,17 @@ export default function InteractiveClock() {
         is24HourMode={is24HourMode}
         showSecondHand={showSecondHand}
         isClockRunning={isClockRunning}
-        currentTheme={currentTheme}
         onToggleTimeFormat={handleTimeFormatToggle}
         onToggleSecondHand={() => setShowSecondHand(!showSecondHand)}
         onToggleClockMovement={() => setIsClockRunning(!isClockRunning)}
         onResetTime={resetToCurrentTime}
-        onThemeChange={setCurrentTheme}
+      />
+      
+      {/* ヘルプオーバーレイ */}
+      <HelpOverlay
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        language={language}
       />
     </ResponsiveContainer>
   )

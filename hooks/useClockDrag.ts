@@ -50,7 +50,8 @@ export const useClockDrag = ({
     (e: React.TouchEvent, clockRef: React.RefObject<SVGSVGElement | null>) => {
       if (!isDragging || e.touches.length === 0 || !clockRef.current) return
 
-      e.preventDefault()
+      // SVGにtouchAction: 'none'を設定しているため、preventDefault()は不要
+      // e.preventDefault()
 
       const touch = e.touches[0]
       const angle = getAngleFromPosition(touch.clientX, touch.clientY, clockRef.current)
