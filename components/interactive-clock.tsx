@@ -199,29 +199,8 @@ export default function InteractiveClock() {
             </h1>
           </div>
           
-          {/* 右側：ヘルプ・時計盤・テーマ選択 */}
+          {/* 右側：時計盤・テーマ選択・ヘルプ */}
           <div className="flex items-center gap-2 z-40">
-            {/* ヘルプボタン */}
-            <button
-              onClick={() => setIsHelpOpen(true)}
-              className={`bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors ${
-                isClient && deviceInfo.isTablet ? 'p-3' : 'p-2'
-              }`}
-              aria-label={t.help}
-            >
-              <svg 
-                width={isClient && deviceInfo.isTablet ? "24" : "20"} 
-                height={isClient && deviceInfo.isTablet ? "24" : "20"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                <path d="M12 17h.01"/>
-              </svg>
-            </button>
             
             {/* 時計盤ドロップダウン */}
             <div className="relative face-dropdown">
@@ -358,6 +337,27 @@ export default function InteractiveClock() {
                 </div>
               )}
             </div>
+            
+            {/* ヘルプボタン */}
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              className={`bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors ${
+                isClient && deviceInfo.isTablet ? 'p-3' : 'p-2'
+              }`}
+              aria-label={t.help}
+            >
+              <svg 
+                width={isClient && deviceInfo.isTablet ? "24" : "20"} 
+                height={isClient && deviceInfo.isTablet ? "24" : "20"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+              >
+                <path d="M8.5 8.5a3.5 3.5 0 0 1 7 1c0 2.5-3.5 3.5-3.5 3.5"/>
+                <circle cx="12" cy="17" r="1" fill="currentColor"/>
+              </svg>
+            </button>
           </div>
         </div>
         

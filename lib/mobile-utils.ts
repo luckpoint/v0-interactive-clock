@@ -107,8 +107,8 @@ export const getOptimalClockSize = (deviceInfo: MobileDetection): { width: numbe
   const isSmallScreen = viewportWidth <= 768
   
   if (deviceInfo.isMobile || isSmallScreen) {
-    // モバイル/小画面では画面幅の70%、最大250px
-    const maxSize = Math.min(viewportWidth * 0.7, 250)
+    // モバイル/小画面では画面幅の70%、最大280px
+    const maxSize = Math.min(viewportWidth * 0.7, 280)
     return { width: maxSize, height: maxSize }
   }
   
@@ -119,7 +119,7 @@ export const getOptimalClockSize = (deviceInfo: MobileDetection): { width: numbe
   }
   
   // デスクトップは標準サイズ
-  return { width: 320, height: 320 }
+  return { width: 450, height: 450 }
 }
 
 export const getTouchAreaExpansion = (deviceInfo: MobileDetection): number => {
