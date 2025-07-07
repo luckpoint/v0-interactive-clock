@@ -15,13 +15,14 @@ import ResponsiveContainer from "./ResponsiveContainer"
 import MobileOptimizedClock from "./MobileOptimizedClock"
 import MobileControlPanel from "./MobileControlPanel"
 import HelpOverlay from "./HelpOverlay"
-import sunClockFace from "../public/sun-clock-face.png"
+const sunClockFace = { src: "/sun-clock-face.png" }
+const animalClockFace = { src: "/cute-animal-clock-face.png" }
 
 export default function InteractiveClock() {
   const clockRef = useRef<SVGSVGElement>(null)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
   const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false)
-  const [clockFace, setClockFace] = useState<'sun' | 'none'>('sun')
+  const [clockFace, setClockFace] = useState<'sun' | 'animal' | 'none'>('sun')
   const [isClockFaceDropdownOpen, setIsClockFaceDropdownOpen] = useState(false)
   
   // ダブルタップ検出のための状態
@@ -58,6 +59,8 @@ export default function InteractiveClock() {
   const t = getTranslations(language)
   const theme = themes[currentTheme]
   const { deviceInfo, triggerHapticFeedback, isClient } = mobileOptimization
+
+  const clockFaceImg = clockFace === 'sun' ? sunClockFace : clockFace === 'animal' ? animalClockFace : null
 
   // ドラッグハンドラーの初期化
   const { handleMouseDown, handleMouseMove, handleMouseUp, handleTouchMove } = useClockDrag({
@@ -214,14 +217,14 @@ export default function InteractiveClock() {
                 }`}
                 aria-label="Clock face selection"
               >
-                {clockFace === 'sun' ? (
+                {clockFace !== 'none' ? (
                   <img
-                    src={sunClockFace.src}
+                    src={clockFaceImg?.src}
                     alt="sun clock face thumbnail"
                     className={`${isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'} rounded-full border border-gray-300 object-cover`}
                   />
                 ) : (
-                  <span className="text-xs font-medium text-gray-700">なし</span>
+                  <span className="text-xs font-medium text-gray-700 whitespace-nowrap">なし</span>
                 )}
                 <svg
                   className={`transition-transform ${isClockFaceDropdownOpen ? 'rotate-180' : ''} ${
@@ -255,6 +258,23 @@ export default function InteractiveClock() {
                         className={`${isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'} rounded-full border border-gray-300 object-cover`}
                       />
                     </button>
+                    {/* Animal face option */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setClockFace('animal')
+                        setIsClockFaceDropdownOpen(false)
+                      }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100/50 transition-colors ${
+                        clockFace === 'animal' ? 'bg-gray-100/50' : ''
+                      }`}
+                    >
+                      <img
+                        src={animalClockFace.src}
+                        alt="animal clock face thumbnail"
+                        className={`${isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'} rounded-full border border-gray-300 object-cover`}
+                      />
+                    </button>
                     {/* None option */}
                     <button
                       onClick={(e) => {
@@ -266,7 +286,7 @@ export default function InteractiveClock() {
                         clockFace === 'none' ? 'bg-gray-100/50' : ''
                       }`}
                     >
-                      <span className="text-sm font-medium">なし</span>
+                      <span className="text-sm font-medium whitespace-nowrap">なし</span>
                     </button>
                   </div>
                 </div>
@@ -392,14 +412,16 @@ export default function InteractiveClock() {
               x={CLOCK_DIMENSIONS.CENTER.x - CLOCK_DIMENSIONS.RADIUS}
               y={CLOCK_DIMENSIONS.CENTER.y - CLOCK_DIMENSIONS.RADIUS}
             >
-              <image
-                href={sunClockFace.src}
-                x="0"
-                y="0"
-                width={CLOCK_DIMENSIONS.RADIUS * 2}
-                height={CLOCK_DIMENSIONS.RADIUS * 2}
-                preserveAspectRatio="xMidYMid slice"
-              />
+              {clockFaceImg && (
+                <image
+                  href={clockFaceImg.src}
+                  x="0"
+                  y="0"
+                  width={CLOCK_DIMENSIONS.RADIUS * 2}
+                  height={CLOCK_DIMENSIONS.RADIUS * 2}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              )}
             </pattern>
           </defs>
           {/* 時計の影 */}
@@ -410,7 +432,7 @@ export default function InteractiveClock() {
             cx={CLOCK_DIMENSIONS.CENTER.x}
             cy={CLOCK_DIMENSIONS.CENTER.y}
             r={CLOCK_DIMENSIONS.RADIUS}
-            fill={clockFace === 'sun' ? 'url(#clock-face-pattern)' : theme.clockFace}
+            fill={clockFace === 'none' ? theme.clockFace : 'url(#clock-face-pattern)'}
             stroke="#e2e8f0"
             strokeWidth="3"
           />
