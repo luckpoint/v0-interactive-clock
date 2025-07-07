@@ -15,8 +15,9 @@ import ResponsiveContainer from "./ResponsiveContainer"
 import MobileOptimizedClock from "./MobileOptimizedClock"
 import MobileControlPanel from "./MobileControlPanel"
 import HelpOverlay from "./HelpOverlay"
-const sunClockFace = { src: "/sun-clock-face.png" }
-const animalClockFace = { src: "/cute-animal-clock-face.png" }
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
+const sunClockFace = { src: `${basePath}/sun-clock-face.png` }
+const animalClockFace = { src: `${basePath}/cute-animal-clock-face.png` }
 
 export default function InteractiveClock() {
   const clockRef = useRef<SVGSVGElement>(null)
