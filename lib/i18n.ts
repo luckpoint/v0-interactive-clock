@@ -30,7 +30,7 @@ export type Language = 'en' | 'ja'
 
 export const translations: Record<Language, Translations> = {
   en: {
-    title: "Interactive Clock",
+    title: "Fun Clock",
     hourHandInstruction: "🔴 Drag the hour hand to adjust time",
     minuteHandInstruction: "🔵 Drag the minute hand to adjust minutes",
     toggleTimeFormat: "Toggle Time Format",
@@ -57,7 +57,7 @@ export const translations: Record<Language, Translations> = {
     close: "Close"
   },
   ja: {
-    title: "インタラクティブ時計",
+    title: "たのしいとけい",
     hourHandInstruction: "🔴 時針をドラッグして時間を調整",
     minuteHandInstruction: "🔵 分針をドラッグして分を調整",
     toggleTimeFormat: "時間表示切り替え",
