@@ -107,8 +107,8 @@ export const getOptimalClockSize = (deviceInfo: MobileDetection): { width: numbe
   const isSmallScreen = viewportWidth <= 768
   
   if (deviceInfo.isMobile || isSmallScreen) {
-    // モバイル/小画面では画面幅の70%、最大280px
-    const maxSize = Math.min(viewportWidth * 0.7, 280)
+    // モバイル/小画面では画面幅の75%、最大280px
+    const maxSize = Math.min(viewportWidth * 0.75, 280)
     return { width: maxSize, height: maxSize }
   }
   
