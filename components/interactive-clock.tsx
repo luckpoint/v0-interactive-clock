@@ -15,16 +15,15 @@ import ResponsiveContainer from "./ResponsiveContainer"
 import MobileOptimizedClock from "./MobileOptimizedClock"
 import MobileControlPanel from "./MobileControlPanel"
 import HelpOverlay from "./HelpOverlay"
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
-const sunClockFace = { src: `${basePath}/sun-clock-face.png` }
-const animalClockFace = { src: `${basePath}/cute-animal-clock-face.png` }
+import ClockFaceOverlay from "./ClockFaceOverlay"
+import { CLOCK_FACES, type ClockFaceKey } from "../lib/clock-faces"
 
 export default function InteractiveClock() {
   const clockRef = useRef<SVGSVGElement>(null)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
   const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false)
-  const [clockFace, setClockFace] = useState<'sun' | 'animal' | 'none'>('sun')
-  const [isClockFaceDropdownOpen, setIsClockFaceDropdownOpen] = useState(false)
+  const [clockFace, setClockFace] = useState<ClockFaceKey | 'none'>('sun')
+  const [isClockFaceOverlayOpen, setIsClockFaceOverlayOpen] = useState(false)
   
   // ダブルタップ検出のための状態
   const [lastTapTime, setLastTapTime] = useState<number>(0)
@@ -61,7 +60,7 @@ export default function InteractiveClock() {
   const theme = themes[currentTheme]
   const { deviceInfo, triggerHapticFeedback, isClient } = mobileOptimization
 
-  const clockFaceImg = clockFace === 'sun' ? sunClockFace : clockFace === 'animal' ? animalClockFace : null
+  const clockFaceImg = clockFace === 'none' ? null : CLOCK_FACES[clockFace]
 
   // ドラッグハンドラーの初期化
   const { handleMouseDown, handleMouseMove, handleMouseUp, handleTouchMove } = useClockDrag({
@@ -172,12 +171,12 @@ export default function InteractiveClock() {
 
   // 時計盤ドロップダウンの外部クリック検出
   useEffect(() => {
-    if (!isClockFaceDropdownOpen) return
+    if (!isClockFaceOverlayOpen) return
 
     const handleOutsideClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement
       if (!target.closest('.face-dropdown')) {
-        setIsClockFaceDropdownOpen(false)
+        setIsClockFaceOverlayOpen(false)
       }
     }
 
@@ -189,7 +188,7 @@ export default function InteractiveClock() {
       clearTimeout(timeoutId)
       document.removeEventListener('click', handleOutsideClick)
     }
-  }, [isClockFaceDropdownOpen])
+  }, [isClockFaceOverlayOpen])
 
   return (
     <ResponsiveContainer className={`bg-gradient-to-br ${theme.background} relative`}>
@@ -211,7 +210,7 @@ export default function InteractiveClock() {
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  setIsClockFaceDropdownOpen(!isClockFaceDropdownOpen)
+                  setIsClockFaceOverlayOpen(true)
                 }}
                 className={`flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors cursor-pointer ${
                   isClient && deviceInfo.isTablet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'
@@ -221,77 +220,24 @@ export default function InteractiveClock() {
                 {clockFace !== 'none' ? (
                   <img
                     src={clockFaceImg?.src}
-                    alt="sun clock face thumbnail"
+                    alt={`${clockFace} clock face thumbnail`}
                     className={`${isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'} rounded-full border border-gray-300 object-cover`}
                   />
                 ) : (
                   <span className="text-xs font-medium text-gray-700 whitespace-nowrap">なし</span>
                 )}
+                {/* simple icon */}
                 <svg
-                  className={`transition-transform ${isClockFaceDropdownOpen ? 'rotate-180' : ''} ${
-                    isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'
-                  }`}
+                  className={`${isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </button>
 
-              {isClockFaceDropdownOpen && (
-                <div className="absolute right-0 mt-1 bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg z-50 p-2">
-                  <div className="flex flex-col gap-1">
-                    {/* Sun face option */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setClockFace('sun')
-                        setIsClockFaceDropdownOpen(false)
-                      }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100/50 transition-colors ${
-                        clockFace === 'sun' ? 'bg-gray-100/50' : ''
-                      }`}
-                    >
-                      <img
-                        src={sunClockFace.src}
-                        alt="sun clock face thumbnail"
-                        className={`${isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'} rounded-full border border-gray-300 object-cover`}
-                      />
-                    </button>
-                    {/* Animal face option */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setClockFace('animal')
-                        setIsClockFaceDropdownOpen(false)
-                      }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100/50 transition-colors ${
-                        clockFace === 'animal' ? 'bg-gray-100/50' : ''
-                      }`}
-                    >
-                      <img
-                        src={animalClockFace.src}
-                        alt="animal clock face thumbnail"
-                        className={`${isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'} rounded-full border border-gray-300 object-cover`}
-                      />
-                    </button>
-                    {/* None option */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setClockFace('none')
-                        setIsClockFaceDropdownOpen(false)
-                      }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100/50 transition-colors ${
-                        clockFace === 'none' ? 'bg-gray-100/50' : ''
-                      }`}
-                    >
-                      <span className="text-sm font-medium whitespace-nowrap">なし</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+              {/* overlay handled separately */}
             </div>
             
             {/* カスタムテーマドロップダウン */}
@@ -382,6 +328,17 @@ export default function InteractiveClock() {
           </div>
         </div>
         
+        {/* Clock face overlay */}
+        <ClockFaceOverlay
+          isOpen={isClockFaceOverlayOpen}
+          onClose={() => setIsClockFaceOverlayOpen(false)}
+          currentFace={clockFace}
+          onSelect={(key) => {
+            setClockFace(key as ClockFaceKey)
+            setIsClockFaceOverlayOpen(false)
+          }}
+        />
+
         {/* 装飾ライン */}
         <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent mt-2"></div>
       </div>

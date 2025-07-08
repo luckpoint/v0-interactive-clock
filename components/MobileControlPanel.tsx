@@ -49,7 +49,7 @@ export default function MobileControlPanel({
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => handleButtonClick(onToggleTimeFormat)}
-            className={`${baseButtonClass} text-xs`}
+            className={`${baseButtonClass}`}
           >
             <span>
               {is24HourMode ? "24-Hour → AM/PM" : "AM/PM → 24-Hour"}
@@ -58,21 +58,21 @@ export default function MobileControlPanel({
 
           <button
             onClick={() => handleButtonClick(onToggleSecondHand)}
-            className={`${baseButtonClass} text-xs`}
+            className={`${baseButtonClass}`}
           >
             <span>Second Hand</span>
           </button>
 
           <button
             onClick={() => handleButtonClick(onToggleClockMovement)}
-            className={`${baseButtonClass} text-xs`}
+            className={`${baseButtonClass}`}
           >
             <span>Stop Clock</span>
           </button>
 
           <button
             onClick={() => handleButtonClick(onResetTime)}
-            className={`${baseButtonClass} text-xs`}
+            className={`${baseButtonClass}`}
           >
             {t.resetButton}
           </button>
@@ -88,28 +88,28 @@ export default function MobileControlPanel({
       <div className="flex gap-4 flex-wrap justify-center">
         <button
           onClick={() => handleButtonClick(onToggleTimeFormat)}
-          className={baseButtonClass}
+          className={`${baseButtonClass}`}
         >
           {is24HourMode ? "24-Hour → AM/PM" : "AM/PM → 24-Hour"}
         </button>
 
         <button
           onClick={() => handleButtonClick(onToggleSecondHand)}
-          className={baseButtonClass}
+          className={`${baseButtonClass}`}
         >
           Second Hand
         </button>
 
         <button
           onClick={() => handleButtonClick(onToggleClockMovement)}
-          className={baseButtonClass}
+          className={`${baseButtonClass}`}
         >
           Stop Clock
         </button>
 
         <button
           onClick={() => handleButtonClick(onResetTime)}
-          className={baseButtonClass}
+          className={`${baseButtonClass}`}
         >
           {t.resetButton}
         </button>
