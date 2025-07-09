@@ -132,7 +132,8 @@ export const getOptimalClockSize = (deviceInfo: MobileDetection): { width: numbe
   }
 
   // === Desktop ===
-  const maxSize = Math.min(viewportWidth * 0.3, 600)
+  // Reduce size by ~20% for desktop: 0.3 → 0.24, cap 500px
+  const maxSize = Math.min(viewportWidth * 0.24, 500)
   return { width: maxSize, height: maxSize }
 }
 

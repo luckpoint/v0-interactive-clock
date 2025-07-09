@@ -121,7 +121,6 @@ export default function MobileOptimizedClock({
         viewBox={`0 0 ${CLOCK_DIMENSIONS.WIDTH} ${CLOCK_DIMENSIONS.HEIGHT}`}
         className={cn(
           "mx-auto cursor-pointer select-none touch-none transition-all duration-200",
-          isClient && deviceInfo.isMobile ? "drop-shadow-xl" : "drop-shadow-2xl",
           isDragging !== null && "scale-105"
         )}
         onMouseMove={onMouseMove}

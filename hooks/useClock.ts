@@ -57,7 +57,34 @@ export const useClock = (): UseClockState & UseClockActions => {
     if (isHydrated) {
       const currentTime = getCurrentTime()
       setTime(currentTime)
-      setLanguage(detectLanguage())
+
+      // ハッシュから言語を判定 (#lang=ja / #lang=en)
+      const parseHashLang = (): Language | null => {
+        if (typeof window === 'undefined') return null
+        const hash = window.location.hash
+        if (hash.startsWith('#lang=')) {
+          const value = hash.replace('#lang=', '')
+          return value === 'ja' ? 'ja' : value === 'en' ? 'en' : null
+        }
+        return null
+      }
+
+      const hashLang = parseHashLang()
+      setLanguage(hashLang ?? detectLanguage())
+
+      // ハッシュ変更を監視して言語を更新
+      const handleHashChange = () => {
+        const newLang = parseHashLang()
+        if (newLang) {
+          setLanguage(newLang)
+        }
+      }
+      window.addEventListener('hashchange', handleHashChange)
+
+      // クリーンアップ
+      return () => {
+        window.removeEventListener('hashchange', handleHashChange)
+      }
     }
   }, [isHydrated])
 
