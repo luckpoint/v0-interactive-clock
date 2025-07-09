@@ -39,6 +39,30 @@ export default function MobileControlPanel({
 
   const baseButtonClass = `bg-white/70 hover:bg-white/90 text-gray-700 font-light rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${mobileButtonClass}`
 
+  // 秒針表示/非表示ボタンのラベル
+  const getSecondHandLabel = () => {
+    return language === 'ja' ? 'びょうしん' : 'Second Hand'
+  }
+
+  // ラベル生成関数
+  const getTimeFormatLabel = () => {
+    if (is24HourMode) {
+      // 現在24時間表示 → AM/PM 表示ボタン
+      return language === 'ja' ? 'ごぜん・ごご' : 'AM/PM'
+    }
+    // 現在AM/PM表示 → 24時間表示ボタン
+    return language === 'ja' ? '24じかん' : '24-Hour'
+  }
+
+  const getClockMovementLabel = () => {
+    if (isClockRunning) {
+      // 動作中 → Stop ボタン
+      return language === 'ja' ? 'とめる' : 'Stop'
+    }
+    // 停止中 → Start ボタン
+    return language === 'ja' ? 'うごかす' : 'Start'
+  }
+
   // クライアントサイドでのみ画面幅を確認
   const isSmallScreen = isClient && typeof window !== 'undefined' && window.innerWidth <= 768
   
@@ -52,7 +76,7 @@ export default function MobileControlPanel({
             className={`${baseButtonClass}`}
           >
             <span>
-              {is24HourMode ? "24-Hour → AM/PM" : "AM/PM → 24-Hour"}
+              {getTimeFormatLabel()}
             </span>
           </button>
 
@@ -60,14 +84,14 @@ export default function MobileControlPanel({
             onClick={() => handleButtonClick(onToggleSecondHand)}
             className={`${baseButtonClass}`}
           >
-            <span>Second Hand</span>
+            <span>{getSecondHandLabel()}</span>
           </button>
 
           <button
             onClick={() => handleButtonClick(onToggleClockMovement)}
             className={`${baseButtonClass}`}
           >
-            <span>Stop Clock</span>
+            <span>{getClockMovementLabel()}</span>
           </button>
 
           <button
@@ -90,21 +114,21 @@ export default function MobileControlPanel({
           onClick={() => handleButtonClick(onToggleTimeFormat)}
           className={`${baseButtonClass}`}
         >
-          {is24HourMode ? "24-Hour → AM/PM" : "AM/PM → 24-Hour"}
+          {getTimeFormatLabel()}
         </button>
 
         <button
           onClick={() => handleButtonClick(onToggleSecondHand)}
           className={`${baseButtonClass}`}
         >
-          Second Hand
+          {getSecondHandLabel()}
         </button>
 
         <button
           onClick={() => handleButtonClick(onToggleClockMovement)}
           className={`${baseButtonClass}`}
         >
-          Stop Clock
+          {getClockMovementLabel()}
         </button>
 
         <button

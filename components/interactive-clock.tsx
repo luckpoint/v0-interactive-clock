@@ -132,6 +132,20 @@ export default function InteractiveClock() {
     triggerHapticFeedback('light')
   }
 
+  // 時間を調整するハンドラー (分単位で加算/減算)
+  const handleAdjustTime = (deltaMinutes: number) => {
+    setTime((prev) => {
+      let totalMinutes = prev.hours * 60 + prev.minutes + deltaMinutes
+      const minutesInDay = 24 * 60
+      totalMinutes = ((totalMinutes % minutesInDay) + minutesInDay) % minutesInDay
+      const newHours = Math.floor(totalMinutes / 60)
+      const newMinutes = totalMinutes % 60
+      return { ...prev, hours: newHours, minutes: newMinutes }
+    })
+    setIsClockRunning(false)
+    triggerHapticFeedback('light')
+  }
+
   // 角度計算の結果を取得
   const hourAngle = hourToAngle(time.hours, time.minutes)
   const minuteAngle = minuteToAngle(time.minutes)
@@ -193,7 +207,7 @@ export default function InteractiveClock() {
   return (
     <ResponsiveContainer className={`bg-gradient-to-br ${theme.background} relative`}>
       {/* ヘッダー部分 */}
-      <div className="w-full mb-4 sm:mb-6 md:mb-8">
+      <div className="w-full mt-2 sm:mt-4 mb-0">
         <div className="flex items-center justify-between w-full max-w-4xl mx-auto">
           {/* 左側：ロゴとタイトル */}
           <div className="flex items-center gap-3">
@@ -214,8 +228,8 @@ export default function InteractiveClock() {
                   e.stopPropagation()
                   setIsClockFaceOverlayOpen(true)
                 }}
-                className={`flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors cursor-pointer ${
-                  isClient && !deviceInfo.isMobile ? 'px-8 py-7 text-3xl' : 'px-3 py-2 text-sm'
+                className={`flex items-center bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors cursor-pointer ${
+                  isClient && !deviceInfo.isMobile ? 'px-3 py-3 text-3xl' : 'px-1.5 py-1 text-sm'
                 }`}
                 aria-label="Clock face selection"
               >
@@ -223,20 +237,11 @@ export default function InteractiveClock() {
                   <img
                     src={clockFaceImg?.src}
                     alt={`${clockFace} clock face thumbnail`}
-                    className={`${isClient && !deviceInfo.isMobile ? 'w-8 h-8' : 'w-4 h-4'} rounded-full border border-gray-300 object-cover`}
+                    className={`${isClient && !deviceInfo.isMobile ? 'w-12 h-12' : 'w-8 h-8'} rounded-full border border-gray-300 object-cover`}
                   />
                 ) : (
                   <span className="text-xs font-medium text-gray-700 whitespace-nowrap">なし</span>
                 )}
-                {/* simple icon */}
-                <svg
-                  className={`${isClient && !deviceInfo.isMobile ? 'w-8 h-8' : 'w-4 h-4'}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
               </button>
 
               {/* overlay handled separately */}
@@ -250,32 +255,22 @@ export default function InteractiveClock() {
                   console.log('Theme dropdown clicked, current state:', isThemeDropdownOpen)
                   setIsThemeDropdownOpen(!isThemeDropdownOpen)
                 }}
-                className={`flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors cursor-pointer ${
-                  isClient && !deviceInfo.isMobile ? 'px-8 py-7 text-3xl' : 'px-3 py-2 text-sm'
+                className={`flex items-center bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors cursor-pointer ${
+                  isClient && !deviceInfo.isMobile ? 'px-3 py-3 text-3xl' : 'px-1.5 py-1 text-sm'
                 }`}
               >
                 <div
                   className={`rounded-full border border-gray-300 ${
-                    isClient && !deviceInfo.isMobile ? 'w-8 h-8' : 'w-4 h-4'
+                    isClient && !deviceInfo.isMobile ? 'w-12 h-12' : 'w-8 h-8'
                   }`}
                   style={{
                     background: getThemeGradient(currentTheme),
                   }}
                 />
-                <svg
-                  className={`transition-transform ${isThemeDropdownOpen ? 'rotate-180' : ''} ${
-                    isClient && !deviceInfo.isMobile ? 'w-8 h-8' : 'w-4 h-4'
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
               </button>
               
               {isThemeDropdownOpen && (
-                <div className="absolute right-0 mt-1 bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg z-50 p-2">
+                <div className="absolute right-0 mt-1 bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg z-50 p-1">
                   <div className="flex flex-col gap-1">
                     {Object.entries(themes).map(([key, themeData]) => (
                       <button
@@ -285,7 +280,7 @@ export default function InteractiveClock() {
                           setCurrentTheme(key as ThemeKey)
                           setIsThemeDropdownOpen(false)
                         }}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100/50 transition-colors ${
+                        className={`flex items-center gap-2 px-2 py-2 rounded-md hover:bg-gray-100/50 transition-colors ${
                           currentTheme === key ? 'bg-gray-100/50' : ''
                         }`}
                         title={themeData.name}
@@ -311,13 +306,13 @@ export default function InteractiveClock() {
             <button
               onClick={() => setIsHelpOpen(true)}
               className={`bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors ${
-                isClient && !deviceInfo.isMobile ? 'p-6' : 'p-2'
+                isClient && !deviceInfo.isMobile ? 'p-2.5' : 'p-1'
               }`}
               aria-label={t.help}
             >
               <svg 
-                width={isClient && !deviceInfo.isMobile ? "36" : "20"} 
-                height={isClient && !deviceInfo.isMobile ? "36" : "20"} 
+                width={isClient && !deviceInfo.isMobile ? "48" : "28"} 
+                height={isClient && !deviceInfo.isMobile ? "48" : "28"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
@@ -581,7 +576,7 @@ export default function InteractiveClock() {
       {/* デジタル表示 */}
       <div
         className={`${theme.digitalBg} backdrop-blur-md text-gray-800 rounded-2xl text-center border border-gray-200/50 shadow-lg mb-3 ${
-          isClient && deviceInfo.isMobile ? 'p-3' : 'p-6'
+          isClient && deviceInfo.isMobile ? 'p-2' : isClient && deviceInfo.isTablet ? 'p-4' : 'p-6'
         }`}
       >
         {isEditing ? (
@@ -591,7 +586,7 @@ export default function InteractiveClock() {
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleEditKeyDown}
             onBlur={handleEditComplete}
-            className={`font-light font-mono mb-2 tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500 ${
+            className={`font-light font-mono tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500 ${
               isClient && deviceInfo.isTablet ? 'text-6xl sm:text-7xl' : 
               'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
             }`}
@@ -599,7 +594,7 @@ export default function InteractiveClock() {
             autoFocus
           />
         ) : (
-          <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="flex items-center justify-center gap-2">
             <div
               className={`font-light font-mono tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors select-none ${
                 isClient && deviceInfo.isMobile ? 'text-2xl' : 
@@ -624,6 +619,36 @@ export default function InteractiveClock() {
             )}
           </div>
         )}
+      </div>
+
+      {/* クイック調整ボタン */}
+      <div className="flex gap-3 mb-3 flex-wrap justify-center">
+        {[
+          { label: "-1h", delta: -60 },
+          { label: "-5m", delta: -5 },
+          { label: "-1m", delta: -1 },
+          { label: "+1m", delta: 1 },
+          { label: "+5m", delta: 5 },
+          { label: "+1h", delta: 60 },
+        ].map((btn) => {
+          const mobileButtonClass = isClient && deviceInfo.isMobile
+            ? "py-2 px-2 text-sm min-h-[44px] min-w-[44px]"
+            : isClient && deviceInfo.isTablet
+            ? "py-4 px-6 text-2xl min-h-[72px]"
+            : "py-2 px-4 text-base"
+
+          const baseButtonClass = `bg-white/70 hover:bg-white/90 text-gray-700 font-light rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center ${mobileButtonClass}`
+
+          return (
+            <button
+              key={btn.label}
+              onClick={() => handleAdjustTime(btn.delta)}
+              className={baseButtonClass}
+            >
+              {btn.label}
+            </button>
+          )
+        })}
       </div>
 
       {/* コントロールパネル */}
