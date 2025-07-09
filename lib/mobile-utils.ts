@@ -102,24 +102,38 @@ export const getOptimalClockSize = (deviceInfo: MobileDetection): { width: numbe
 
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
-  
-  // 画面サイズに基づいた判定も追加
-  const isSmallScreen = viewportWidth <= 768
-  
-  if (deviceInfo.isMobile || isSmallScreen) {
-    // モバイル/小画面では画面幅の75%、最大280px
-    const maxSize = Math.min(viewportWidth * 0.75, 280)
+
+  /*
+   * To provide more balanced sizing we will derive the size from the
+   * smaller side of the viewport. This gives us a consistent look in
+   * both portrait and landscape orientations.
+   */
+  const minDimension = Math.min(viewportWidth, viewportHeight)
+
+  // === Mobile / small screens (<= 768px) ===
+  if (deviceInfo.isMobile || viewportWidth <= 768) {
+    // Use 80% of the smaller dimension, cap at 320-280px for compact phones
+    const maxSize = Math.min(minDimension * 0.8, 320)
     return { width: maxSize, height: maxSize }
   }
-  
+
+  // === Large tablets (e.g. iPad Pro 11/12.9) ===
+  // We treat tablets whose shorter edge is >= 800px as "large" tablets.
+  if (deviceInfo.isTablet && minDimension >= 800) {
+    const maxSize = Math.min(minDimension * 0.85, 900)
+    return { width: maxSize, height: maxSize }
+  }
+
+  // === Regular tablets ===
   if (deviceInfo.isTablet) {
-    // タブレットでは少し大きめ
-    const maxSize = Math.min(viewportWidth * 0.6, 360)
+    // Use 75% of the shorter edge, cap at 700px
+    const maxSize = Math.min(minDimension * 0.75, 700)
     return { width: maxSize, height: maxSize }
   }
-  
-  // デスクトップは標準サイズ
-  return { width: 450, height: 450 }
+
+  // === Desktop ===
+  const maxSize = Math.min(viewportWidth * 0.3, 600)
+  return { width: maxSize, height: maxSize }
 }
 
 export const getTouchAreaExpansion = (deviceInfo: MobileDetection): number => {

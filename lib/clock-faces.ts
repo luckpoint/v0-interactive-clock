@@ -28,6 +28,21 @@ export const CLOCK_FACES = {
   unicorn:   { src: `${basePath}/clock-faces/clock-face-unicorn.png`,        label: 'Unicorn' },
   animalBedroom:{ src: `${basePath}/clock-faces/clock-face-animal-bedroom.png`, label: 'Animal Bedroom' },
   gardenButterflies:{ src: `${basePath}/clock-faces/clock-face-garden-butterflies.png`, label: 'Garden Butterflies' },
+  /* Newly added faces */
+  animalFriends:{ src: `${basePath}/clock-faces/clock-face-animal-friends.png`, label: 'Animal Friends' },
+  cuteFashionAnimal:{ src: `${basePath}/clock-faces/clock-face-cute-fasion-animal.png`, label: 'Cute Fashion Animal' },
+  dinosaur: { src: `${basePath}/clock-faces/clock-face-dinosaur.png`, label: 'Dinosaur' },
+  dragon: { src: `${basePath}/clock-faces/clock-face-dragon.png`, label: 'Dragon' },
+  fairyTaleGarden:{ src: `${basePath}/clock-faces/clock-face-fairy-tale-garden.png`, label: 'Fairy Tale Garden' },
+  football: { src: `${basePath}/clock-faces/clock-face-football.png`, label: 'Football' },
+  gardenButterfly:{ src: `${basePath}/clock-faces/clock-face-garden-butterfly.png`, label: 'Garden Butterfly' },
+  magicalCastle:{ src: `${basePath}/clock-faces/clock-face-magical-castle.png`, label: 'Magical Castle' },
+  mermaid: { src: `${basePath}/clock-faces/clock-face-mermaid.png`, label: 'Mermaid' },
+  pirate: { src: `${basePath}/clock-faces/clock-face-pirate.png`, label: 'Pirate' },
+  rainbowAnimal:{ src: `${basePath}/clock-faces/clock-face-rainbow-animal.png`, label: 'Rainbow Animal' },
+  robot: { src: `${basePath}/clock-faces/clock-face-robot.png`, label: 'Robot' },
+  space: { src: `${basePath}/clock-faces/clock-face-space.png`, label: 'Space' },
+  sweetsTheme: { src: `${basePath}/clock-faces/clock-face-sweets-theme.png`, label: 'Sweets Theme' },
 } as const
 
 export type ClockFaceKey = keyof typeof CLOCK_FACES 

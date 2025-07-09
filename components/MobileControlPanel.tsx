@@ -34,7 +34,7 @@ export default function MobileControlPanel({
   const mobileButtonClass = isClient && deviceInfo.isMobile
     ? "py-4 px-4 text-sm min-h-[44px] min-w-[44px]" // Apple HIG準拠の最小タッチターゲット
     : isClient && deviceInfo.isTablet
-    ? "py-4 px-6 text-lg min-h-[56px]" // タブレット向け大きめサイズ
+    ? "py-6 px-10 text-2xl min-h-[72px]" // 大型タブレット向けさらに大きめサイズ
     : "py-3 px-6 text-base"
 
   const baseButtonClass = `bg-white/70 hover:bg-white/90 text-gray-700 font-light rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${mobileButtonClass}`

@@ -97,8 +97,8 @@ export default function MobileOptimizedClock({
   }
 
   // デバイスに応じたサイズ調整（hydration問題を回避）
-  const optimizedWidth = isClient && (deviceInfo.isMobile || deviceInfo.isTablet) ? clockSize.width : width
-  const optimizedHeight = isClient && (deviceInfo.isMobile || deviceInfo.isTablet) ? clockSize.height : height
+  const optimizedWidth = isClient ? clockSize.width : width
+  const optimizedHeight = isClient ? clockSize.height : height
 
   // タッチ領域の拡大スタイル（hydration問題を回避）
   const touchEnhancementStyle = isClient && deviceInfo.hasTouch ? {

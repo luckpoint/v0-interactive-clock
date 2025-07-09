@@ -194,10 +194,12 @@ export default function InteractiveClock() {
     <ResponsiveContainer className={`bg-gradient-to-br ${theme.background} relative`}>
       {/* ヘッダー部分 */}
       <div className="w-full mb-4 sm:mb-6 md:mb-8">
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between w-full max-w-4xl mx-auto">
           {/* 左側：ロゴとタイトル */}
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-800 flex items-center gap-3 tracking-wide">
+            <h1 className={`font-light text-gray-800 flex items-center gap-3 tracking-wide ${
+              isClient && deviceInfo.isTablet ? 'text-4xl sm:text-5xl md:text-6xl' : 'text-2xl sm:text-3xl md:text-4xl'
+            }`}>
               🕐 {t.title}
             </h1>
           </div>
@@ -213,7 +215,7 @@ export default function InteractiveClock() {
                   setIsClockFaceOverlayOpen(true)
                 }}
                 className={`flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors cursor-pointer ${
-                  isClient && deviceInfo.isTablet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'
+                  isClient && !deviceInfo.isMobile ? 'px-8 py-7 text-3xl' : 'px-3 py-2 text-sm'
                 }`}
                 aria-label="Clock face selection"
               >
@@ -221,14 +223,14 @@ export default function InteractiveClock() {
                   <img
                     src={clockFaceImg?.src}
                     alt={`${clockFace} clock face thumbnail`}
-                    className={`${isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'} rounded-full border border-gray-300 object-cover`}
+                    className={`${isClient && !deviceInfo.isMobile ? 'w-8 h-8' : 'w-4 h-4'} rounded-full border border-gray-300 object-cover`}
                   />
                 ) : (
                   <span className="text-xs font-medium text-gray-700 whitespace-nowrap">なし</span>
                 )}
                 {/* simple icon */}
                 <svg
-                  className={`${isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'}`}
+                  className={`${isClient && !deviceInfo.isMobile ? 'w-8 h-8' : 'w-4 h-4'}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -249,12 +251,12 @@ export default function InteractiveClock() {
                   setIsThemeDropdownOpen(!isThemeDropdownOpen)
                 }}
                 className={`flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors cursor-pointer ${
-                  isClient && deviceInfo.isTablet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'
+                  isClient && !deviceInfo.isMobile ? 'px-8 py-7 text-3xl' : 'px-3 py-2 text-sm'
                 }`}
               >
                 <div
                   className={`rounded-full border border-gray-300 ${
-                    isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'
+                    isClient && !deviceInfo.isMobile ? 'w-8 h-8' : 'w-4 h-4'
                   }`}
                   style={{
                     background: getThemeGradient(currentTheme),
@@ -262,7 +264,7 @@ export default function InteractiveClock() {
                 />
                 <svg
                   className={`transition-transform ${isThemeDropdownOpen ? 'rotate-180' : ''} ${
-                    isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'
+                    isClient && !deviceInfo.isMobile ? 'w-8 h-8' : 'w-4 h-4'
                   }`}
                   fill="none"
                   stroke="currentColor"
@@ -292,7 +294,7 @@ export default function InteractiveClock() {
                           className={`rounded-full border-2 ${
                             currentTheme === key ? 'border-gray-700' : 'border-gray-300'
                           } ${
-                            isClient && deviceInfo.isTablet ? 'w-5 h-5' : 'w-4 h-4'
+                            isClient && !deviceInfo.isMobile ? 'w-8 h-8' : 'w-4 h-4'
                           }`}
                           style={{
                             background: getThemeGradient(key as ThemeKey),
@@ -309,13 +311,13 @@ export default function InteractiveClock() {
             <button
               onClick={() => setIsHelpOpen(true)}
               className={`bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm hover:bg-white/90 transition-colors ${
-                isClient && deviceInfo.isTablet ? 'p-3' : 'p-2'
+                isClient && !deviceInfo.isMobile ? 'p-6' : 'p-2'
               }`}
               aria-label={t.help}
             >
               <svg 
-                width={isClient && deviceInfo.isTablet ? "24" : "20"} 
-                height={isClient && deviceInfo.isTablet ? "24" : "20"} 
+                width={isClient && !deviceInfo.isMobile ? "36" : "20"} 
+                height={isClient && !deviceInfo.isMobile ? "36" : "20"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
@@ -590,7 +592,7 @@ export default function InteractiveClock() {
             onKeyDown={handleEditKeyDown}
             onBlur={handleEditComplete}
             className={`font-light font-mono mb-2 tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500 ${
-              isClient && deviceInfo.isTablet ? 'text-4xl sm:text-5xl' : 
+              isClient && deviceInfo.isTablet ? 'text-6xl sm:text-7xl' : 
               'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
             }`}
             placeholder={showSecondHand ? "HH:MM:SS" : "HH:MM"}
@@ -601,7 +603,7 @@ export default function InteractiveClock() {
             <div
               className={`font-light font-mono tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors select-none ${
                 isClient && deviceInfo.isMobile ? 'text-2xl' : 
-                isClient && deviceInfo.isTablet ? 'text-4xl sm:text-5xl' : 
+                isClient && deviceInfo.isTablet ? 'text-6xl sm:text-7xl' : 
                 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
               }`}
               onDoubleClick={handleEditStart}
@@ -614,7 +616,7 @@ export default function InteractiveClock() {
             {!is24HourMode && (
               <div className={`font-light opacity-70 tracking-wide ${
                 isClient && deviceInfo.isMobile ? 'text-sm' : 
-                isClient && deviceInfo.isTablet ? 'text-lg sm:text-xl' : 
+                isClient && deviceInfo.isTablet ? 'text-2xl sm:text-3xl' : 
                 'text-xl sm:text-2xl md:text-3xl'
               }`}>
                 {isAMTime ? "AM" : "PM"}
