@@ -120,6 +120,14 @@ This document outlines the UI design specifications for the Fun Clock applicatio
 | **Buttons** | `24-Hour`, `Second Hand`, `Stop`, `Reset` |
 | **Spacing** | Even distribution with gaps |
 
+##### Font Sizes (共通)
+| Device | Orientation | Tailwind Class | Approx. Size |
+|--------|-------------|----------------|--------------|
+| Mobile | - | `text-sm` | ~14px |
+| Tablet | Portrait | `text-2xl` | ~24px |
+| Tablet | Landscape | `text-xl` | ~20px |
+| Desktop | - | `text-base` | ~16px |
+
 ### Modal Dialogs
 
 #### Clock Face Selection

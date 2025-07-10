@@ -22,7 +22,7 @@ export default function MobileControlPanel({
   onToggleClockMovement,
   onResetTime,
 }: MobileControlPanelProps) {
-  const { deviceInfo, triggerHapticFeedback, isClient } = useMobileOptimization()
+  const { deviceInfo, triggerHapticFeedback, isClient, isLandscape } = useMobileOptimization()
   const t = getTranslations(language)
 
   const handleButtonClick = (action: () => void) => {
@@ -32,9 +32,11 @@ export default function MobileControlPanel({
 
   // モバイル向けボタンスタイル（hydration問題を回避）
   const mobileButtonClass = isClient && deviceInfo.isMobile
-    ? "py-4 px-4 text-sm min-h-[44px] min-w-[44px]" // Apple HIG準拠の最小タッチターゲット
+    ? "py-4 px-4 text-sm min-h-[44px] min-w-[44px]" // モバイル
+    : isClient && deviceInfo.isTablet && isLandscape
+    ? "py-3 px-5 text-xl min-h-[60px]" // タブレット横向き（タイム調整ボタンに合わせる）
     : isClient && deviceInfo.isTablet
-    ? "py-6 px-10 text-2xl min-h-[72px]" // 大型タブレット向けさらに大きめサイズ
+    ? "py-4 px-6 text-2xl min-h-[72px]" // タブレット縦向き
     : "py-3 px-6 text-base"
 
   const baseButtonClass = `bg-white/70 hover:bg-white/90 text-gray-700 font-light rounded-xl transition-all duration-300 backdrop-blur-md border border-gray-200/60 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${mobileButtonClass}`
