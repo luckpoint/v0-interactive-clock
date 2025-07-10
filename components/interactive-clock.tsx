@@ -58,7 +58,7 @@ export default function InteractiveClock() {
   // 現在の翻訳を取得
   const t = getTranslations(language)
   const theme = themes[currentTheme]
-  const { deviceInfo, triggerHapticFeedback, isClient } = mobileOptimization
+  const { deviceInfo, triggerHapticFeedback, isClient, isLandscape } = mobileOptimization
 
   const clockFaceImg = clockFace === 'none' ? null : CLOCK_FACES[clockFace]
 
@@ -212,6 +212,7 @@ export default function InteractiveClock() {
           {/* 左側：ロゴとタイトル */}
           <div className="flex items-center gap-3">
             <h1 className={`font-light text-gray-800 flex items-center gap-3 tracking-wide ${
+              isClient && deviceInfo.isTablet && isLandscape ? 'text-3xl sm:text-4xl md:text-5xl' :
               isClient && deviceInfo.isTablet ? 'text-4xl sm:text-5xl md:text-6xl' : 'text-2xl sm:text-3xl md:text-4xl'
             }`}>
               🕐 {t.title}
@@ -587,6 +588,7 @@ export default function InteractiveClock() {
             onKeyDown={handleEditKeyDown}
             onBlur={handleEditComplete}
             className={`font-light font-mono tracking-wider bg-transparent text-center outline-none border-b-2 border-gray-400 focus:border-blue-500 ${
+              isClient && deviceInfo.isTablet && isLandscape ? 'text-5xl sm:text-6xl' : 
               isClient && deviceInfo.isTablet ? 'text-6xl sm:text-7xl' : 
               'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
             }`}
@@ -598,6 +600,7 @@ export default function InteractiveClock() {
             <div
               className={`font-light font-mono tracking-wider cursor-pointer hover:bg-gray-100/20 rounded-lg p-2 transition-colors select-none ${
                 isClient && deviceInfo.isMobile ? 'text-2xl' : 
+                isClient && deviceInfo.isTablet && isLandscape ? 'text-5xl sm:text-6xl' : 
                 isClient && deviceInfo.isTablet ? 'text-6xl sm:text-7xl' : 
                 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
               }`}
@@ -633,6 +636,8 @@ export default function InteractiveClock() {
         ].map((btn) => {
           const mobileButtonClass = isClient && deviceInfo.isMobile
             ? "py-2 px-2 text-sm min-h-[44px] min-w-[44px]"
+            : isClient && deviceInfo.isTablet && isLandscape
+            ? "py-3 px-5 text-xl min-h-[60px]"
             : isClient && deviceInfo.isTablet
             ? "py-4 px-6 text-2xl min-h-[72px]"
             : "py-2 px-4 text-base"

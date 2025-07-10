@@ -112,7 +112,15 @@ export const getOptimalClockSize = (deviceInfo: MobileDetection): { width: numbe
 
   // === Mobile / small screens (<= 768px) ===
   if (deviceInfo.isMobile || viewportWidth <= 768) {
-    // Use 80% of the smaller dimension, cap at 320-280px for compact phones
+    const isLandscape = viewportWidth > viewportHeight
+
+    if (isLandscape) {
+      // Landscape: reduce further to fit vertical space
+      const maxSize = Math.min(minDimension * 0.48, 240)
+      return { width: maxSize, height: maxSize }
+    }
+
+    // Portrait: use 80% of the smaller dimension, cap at 320px for compact phones
     const maxSize = Math.min(minDimension * 0.8, 320)
     return { width: maxSize, height: maxSize }
   }
@@ -120,13 +128,36 @@ export const getOptimalClockSize = (deviceInfo: MobileDetection): { width: numbe
   // === Large tablets (e.g. iPad Pro 11/12.9) ===
   // We treat tablets whose shorter edge is >= 800px as "large" tablets.
   if (deviceInfo.isTablet && minDimension >= 800) {
+    const isLandscape = viewportWidth > viewportHeight
+
+    if (isLandscape) {
+      // In landscape mode use a smaller ratio to fit the UI comfortably
+      const maxSize = Math.min(viewportHeight * 0.65, 600)
+      return { width: maxSize, height: maxSize }
+    }
+
     const maxSize = Math.min(minDimension * 0.85, 900)
     return { width: maxSize, height: maxSize }
   }
 
   // === Regular tablets ===
   if (deviceInfo.isTablet) {
-    // Use 75% of the shorter edge, cap at 700px
+    // Detect orientation (landscape if width > height)
+    const isLandscape = viewportWidth > viewportHeight
+
+    if (isLandscape) {
+      /*
+       * In landscape mode, vertical space is limited. Reduce the size so that
+       * the clock plus the additional UI (digital display, buttons, etc.) can
+       * fit inside the viewport height. Empirically 55-60% of the viewport
+       * height yields a good balance on common tablet resolutions (e.g.
+       * 1024×768, 1366×1024).
+       */
+      const maxSize = Math.min(viewportHeight * 0.6, 500)
+      return { width: maxSize, height: maxSize }
+    }
+
+    // Portrait – use 75% of the shorter edge, cap at 700px (existing behaviour)
     const maxSize = Math.min(minDimension * 0.75, 700)
     return { width: maxSize, height: maxSize }
   }
