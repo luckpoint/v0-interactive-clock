@@ -11,12 +11,14 @@ const nextConfig = {
   },
   output: 'export',
   trailingSlash: true,
-  basePath: process.env.NODE_ENV === 'production' ? '/v0-interactive-clock' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/v0-interactive-clock' : '',
+  // Use NEXT_PUBLIC_BASE_PATH to optionally set a sub-directory deploy path (e.g. GitHub Pages).
+  // When the variable is undefined or an empty string, the app will be served from the root path.
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || '',
   // distDir: 'out',
   // GitHub Pagesで必要な追加設定
   env: {
-    NEXT_PUBLIC_BASE_PATH: process.env.NODE_ENV === 'production' ? '/v0-interactive-clock' : '',
+    NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH || '',
   },
 }
 
